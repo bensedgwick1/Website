@@ -283,19 +283,18 @@ const passages = {
   "Cave": {
     title: "Murky Cave",
     image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
-    text: "The air in the cave is damp and cold. As you step inside, a monstrous, snarling rat leaps from the shadows!",
-    options: [], // Combat will generate options
-    monster: "Giant Rat"
+    text: "The air in the cave is damp and cold. You hear the skittering of claws in the darkness.",
+    monster: "Giant Rat",
+    options: []
   },
   "CaveInterior": {
       title: "Cave Interior",
       image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
-      text: "With the rat defeated, you can now see ancient drawings on the walls, depicting a great city beyond the mountains.",
+      text: "You are in a damp, murky cave. You can see some ancient drawings on the walls, depicting a great city beyond the mountains.",
       options: [
         { text: "Explore deeper", target: "DeepCave" },
         { text: "Leave the cave", target: "Forest" }
-      ],
-      effects: { xp: 10 }
+      ]
   },
   "Boat": {
     title: "Adrift",
@@ -356,8 +355,7 @@ const passages = {
       text: "You've defeated the creature and finally see a way out of the oppressive swamp. You emerge onto a muddy path leading towards the city.",
       options: [
           { text: "Follow the path", target: "Outskirts" }
-      ],
-      effects: { xp: 25 }
+      ]
   },
   "Flower": {
     title: "Magical Flower",
@@ -456,8 +454,7 @@ const passages = {
       text: "The wolf lies defeated. The plains fall silent once more. In the distance, you see what looks like a small farmstead.",
       options: [
           { text: "Head for the farmstead", target: "Farmstead" }
-      ],
-      effects: { xp: 20 }
+      ]
   },
   "Farmstead": {
       title: "The Old Farmstead",
@@ -695,11 +692,75 @@ const passages = {
     "Catacombs_L1_Victory": {
         title: "The Knight's Defeat",
         image: "https://images.unsplash.com/photo-1574933934529-3a8a13375753a8?auto=format&fit=crop&w=800&q=80",
-        text: "The Skeletal Knight shatters into a pile of dust and cursed armor. Behind its throne, you see a gleaming sword and a passage leading deeper into the catacombs.",
+        text: "The Skeletal Knight shatters into a pile of dust and cursed armor. Behind its throne, you find a gleaming sword, the Shadow Blade, and a passage leading deeper into the catacombs.",
         item: "Shadow Blade",
         options: [
-            { text: "Take the Shadow Blade", target: "Catacombs_L1_Loot" },
             { text: "Descend to the next level", target: "Catacombs_Level2_Start" }
+        ]
+    },
+
+    // --- CATACOMBS LEVEL 2 ---
+    "Catacombs_Level2_Start": {
+        title: "The Second Level",
+        image: "https://source.unsplash.com/800x600/?dark,crypt",
+        text: "The stairs lead you deeper into the earth. The air here is colder, and a faint, unnatural mist clings to the floor. You hear a low moaning from a hallway to your left.",
+        options: [
+            { text: "Go towards the moaning", target: "Catacombs_L2_GhoulHall" },
+            { text: "Take the other path", target: "Catacombs_L2_PuzzleRoom" },
+            { text: "Return to the first level", target: "Catacombs_L1_Victory" }
+        ]
+    },
+    "Catacombs_L2_GhoulHall": {
+        title: "The Ghoul's Hall",
+        image: "https://source.unsplash.com/800x600/?dark,dungeon,hallway",
+        text: "The hallway is littered with gnawed bones. A hunched, grotesque creature with long claws is feasting on a corpse. It turns its head and hisses at you.",
+        monster: "Ghoul",
+        options: []
+    },
+    "Catacombs_L2_GhoulLair": {
+        title: "The Ghoul's Lair",
+        image: "https://source.unsplash.com/800x600/?dark,dungeon,lair",
+        text: "You have defeated the ghoul. In the filth of its lair, you find a sturdy-looking shield.",
+        item: "Iron Shield",
+        options: [
+            { text: "Continue down the hall", target: "Catacombs_L2_FloodedRoom" }
+        ]
+    },
+    "Catacombs_L2_PuzzleRoom": {
+        title: "The Room of Scales",
+        image: "https://source.unsplash.com/800x600/?dungeon,puzzle",
+        text: "You enter a room with a large, sealed stone door. In front of it are three pressure plates. An inscription reads: 'Only the humble may pass.'",
+        options: [
+            { text: "Step on the left plate", action: "puzzle", puzzleId: "scales", choice: "left" },
+            { text: "Step on the middle plate", action: "puzzle", puzzleId: "scales", choice: "middle" },
+            { text: "Step on the right plate", action: "puzzle", puzzleId: "scales", choice: "right" },
+            { text: "Leave the room", target: "Catacombs_Level2_Start" }
+        ]
+    },
+    "Catacombs_L2_Puzzle_Fail": {
+        title: "A Fool's Choice",
+        image: "https://source.unsplash.com/800x600/?dungeon,trap",
+        text: "You step on the plate, and a volley of poison darts shoots from the walls!",
+        effects: { health: -30 },
+        options: [
+            { text: "Try again", target: "Catacombs_L2_PuzzleRoom" }
+        ]
+    },
+    "Catacombs_L2_Puzzle_Success": {
+        title: "The Way is Open",
+        image: "https://source.unsplash.com/800x600/?dungeon,door,open",
+        text: "You step on the plate, and with a low groan, the stone door grinds open, revealing a treasure room.",
+        options: [
+            { text: "Enter the treasure room", target: "Catacombs_L2_Treasure" }
+        ]
+    },
+    "Catacombs_L2_Treasure": {
+        title: "The Hidden Treasury",
+        image: "https://source.unsplash.com/800x600/?treasure,chest",
+        text: "The room contains a single, iron-bound chest. You open it to find a finely crafted set of chainmail armor.",
+        item: "Chainmail Armor",
+        options: [
+            { text: "Return to the puzzle room", target: "Catacombs_L2_PuzzleRoom" }
         ]
     }
 };
@@ -709,6 +770,8 @@ const items = {
     "Iron Sword": { type: "weapon", attack: 10, description: "A simple but sturdy iron sword.", value: 50 },
     "Shadow Blade": { type: "weapon", attack: 20, description: "A blade forged from shadows, humming with dark energy.", value: 200 },
     "Leather Armor": { type: "armor", defense: 5, description: "Hardened leather armor.", value: 40 },
+    "Chainmail Armor": { type: "armor", defense: 10, description: "A full set of interlocking iron rings.", value: 120 },
+    "Iron Shield": { type: "armor", defense: 2, description: "A simple but effective iron shield.", value: 30 },
     "Rusted Key": { type: "key", description: "A small, ornate key, covered in rust." },
     "Glowing Petal": { type: "trinket", description: "Glows with a soft, warm light.", value: 5 },
     "Old Coin": { type: "quest", description: "A shiny coin from a forgotten era.", value: 0 },
@@ -718,7 +781,7 @@ const items = {
 const shops = {
     "blacksmith": {
         name: "The Steel Sentinel",
-        inventory: ["Iron Sword", "Leather Armor"]
+        inventory: ["Iron Sword", "Leather Armor", "Iron Shield"]
     },
     "alchemist": {
         name: "The Bubbling Beaker",
@@ -732,7 +795,7 @@ const monsters = {
         attack: 5,
         xp: 10,
         gold: 5,
-        image: "https://images.unsplash.com/photo-1599669466277-681419a48919?auto=format&fit=crop&w=800&q=80",
+        image: "https://source.unsplash.com/800x600/?dark,cave,rat",
         deathText: "The giant rat squeals and collapses.",
         nextPassage: "CaveInterior"
     },
@@ -750,7 +813,7 @@ const monsters = {
         attack: 12,
         xp: 25,
         gold: 15,
-        image: "https://images.unsplash.com/photo-1504984392439-e4a8a044a86f?auto=format&fit=crop&w=800&q=80",
+        image: "https://source.unsplash.com/800x600/?dark,swamp,monster",
         deathText: "The tentacle recoils with a gurgle and sinks back into the murky water.",
         nextPassage: "SwampAftermath"
     },
@@ -759,7 +822,7 @@ const monsters = {
         attack: 10,
         xp: 15,
         gold: 8,
-        image: "https://images.unsplash.com/photo-1564769719542-736d4a033e48?auto=format&fit=crop&w=800&q=80",
+        image: "https://source.unsplash.com/800x600/?skeleton,warrior,dungeon",
         deathText: "The skeleton clatters into a pile of bones.",
         nextPassage: "Catacombs_L1_DeadEnd"
     },
@@ -768,7 +831,7 @@ const monsters = {
         attack: 8,
         xp: 20,
         gold: 12,
-        image: "https://images.unsplash.com/photo-1580985290748-5246a4821a0a?auto=format&fit=crop&w=800&q=80",
+        image: "https://source.unsplash.com/800x600/?zombie,graveyard,night",
         deathText: "The zombie groans and falls silent.",
         nextPassage: "Catacombs_L1_EmptySarcophagus"
     },
@@ -777,11 +840,22 @@ const monsters = {
         attack: 15,
         xp: 50,
         gold: 50,
-        image: "https://images.unsplash.com/photo-1574933934529-3a8a13375753a8?auto=format&fit=crop&w=800&q=80",
+        image: "https://source.unsplash.com/800x600/?skeleton,knight,armor",
         deathText: "The Skeletal Knight shatters into a pile of dust and cursed armor.",
         nextPassage: "Catacombs_L1_Victory"
+    },
+    "Ghoul": {
+        health: 80,
+        attack: 18,
+        xp: 40,
+        gold: 30,
+        image: "https://source.unsplash.com/800x600/?monster,ghoul,dark",
+        deathText: "The ghoul lets out a final, wretched scream and dissolves into shadow.",
+        nextPassage: "Catacombs_L2_GhoulLair"
     }
 };
+
+const xpPerLevel = [0, 10, 30, 60, 100, 200]; // XP needed to reach level 1, 2, 3, 4, 5
 
 // --- GAME LOGIC ---
 
@@ -790,6 +864,7 @@ let player = {};
 function initializePlayer() {
     player = {
         stats: { health: 100, mana: 80, energy: 100, happiness: 50 },
+        maxStats: { health: 100, mana: 80, energy: 100, happiness: 100 },
         baseAttack: 5,
         defense: 0,
         level: 1,
@@ -798,7 +873,8 @@ function initializePlayer() {
         inventory: [],
         equipment: { weapon: null, armor: null },
         visits: {},
-        currentPassage: "Start"
+        currentPassage: "Start",
+        previousPassage: "Start"
     };
 }
 
@@ -830,14 +906,12 @@ function updateAllUI() {
 
 function updateStats() {
   for (const stat in player.stats) {
-    const val = clamp(player.stats[stat]);
+    const val = clamp(player.stats[stat], 0, player.maxStats[stat]);
     document.getElementById(`${stat}-val`).textContent = val;
-    document.getElementById(`${stat}-bar`).style.width = val + '%';
+    document.getElementById(`${stat}-bar`).style.width = (val / player.maxStats[stat] * 100) + '%';
   }
   document.getElementById('level-val').textContent = player.level;
-  document.getElementById('xp-val').textContent = player.xp;
-  // Assuming you add a gold display element
-  // document.getElementById('gold-val').textContent = player.gold;
+  document.getElementById('xp-val').textContent = `${player.xp} / ${xpPerLevel[player.level] || 'Max'}`;
 }
 
 function updateInventory() {
@@ -856,15 +930,19 @@ function updateInventory() {
             ul.appendChild(li);
         });
     }
+    const goldLi = document.createElement('li');
+    goldLi.innerHTML = `<strong>Gold:</strong> ${player.gold}`;
+    ul.appendChild(goldLi);
 }
 
 function updateVisitList() {
   const ul = document.getElementById('visit-list');
   ul.innerHTML = '';
-  Object.keys(player.visits).forEach(place => {
-      if (!place.endsWith("_defeated")) {
+  const uniqueVisits = [...new Set(Object.keys(player.visits).map(p => passages[p] ? passages[p].title : p))];
+  uniqueVisits.forEach(title => {
+      if (title) {
         const li = document.createElement('li');
-        li.textContent = `${passages[place] ? passages[place].title : place}`;
+        li.textContent = title;
         ul.appendChild(li);
       }
   });
@@ -906,25 +984,46 @@ function checkCondition(condition) {
     return false;
 }
 
+function levelUp() {
+    while (player.level < xpPerLevel.length - 1 && player.xp >= xpPerLevel[player.level]) {
+        player.level++;
+        player.maxStats.health += 10;
+        player.stats.health = player.maxStats.health; // Full heal on level up
+        player.baseAttack += 2;
+        alert(`Congratulations! You have reached Level ${player.level}! Your health and attack have increased.`);
+    }
+}
+
+function handlePuzzle(puzzleId, choice) {
+    if (puzzleId === 'scales') {
+        if (choice === 'middle') { // The 'humble' choice
+            renderPassage('Catacombs_L2_Puzzle_Success');
+        } else {
+            renderPassage('Catacombs_L2_Puzzle_Fail');
+        }
+    }
+}
+
 function renderPassage(passageName) {
+  if(player.currentPassage !== passageName) {
+    player.previousPassage = player.currentPassage;
+  }
   player.currentPassage = passageName;
   const passage = passages[passageName];
 
   if (!passage) {
       console.error("Passage not found: " + passageName);
-      // Fallback to a safe passage
       renderPassage("Start");
       return;
   }
 
-  // Handle special actions
   if (passage.action) {
       switch (passage.action) {
           case "fullHeal":
-              player.stats.health = 100;
-              player.stats.mana = 100;
-              player.stats.energy = 100;
-              player.gold -= 15; // Cost of room
+              player.stats.health = player.maxStats.health;
+              player.stats.mana = player.maxStats.mana;
+              player.stats.energy = player.maxStats.energy;
+              player.gold -= 15;
               break;
           case "random":
               const randomOption = passage.options[Math.floor(Math.random() * passage.options.length)];
@@ -964,7 +1063,7 @@ function renderPassage(passageName) {
   if (passage.effects) {
       for(const effect in passage.effects) {
           if(player.stats[effect] !== undefined) {
-              player.stats[effect] = clamp(player.stats[effect] + passage.effects[effect]);
+              player.stats[effect] = clamp(player.stats[effect] + passage.effects[effect], 0, player.maxStats[effect]);
           } else if (player[effect] !== undefined) {
               player[effect] += passage.effects[effect];
           }
@@ -989,7 +1088,7 @@ function renderPassage(passageName) {
   }
 
   const monsterName = passage.monster;
-  if (monsterName && !player.visits[passageName + "_defeated"]) {
+  if (monsterName) {
       startCombat(monsterName);
       return;
   }
@@ -1003,7 +1102,7 @@ function renderPassage(passageName) {
       <img class="passage-image" src="${passage.image}" alt="${passage.title} image" />
       <p class="passage-text">${passage.text}</p>
       <nav class="nav-buttons" role="navigation" aria-label="Choices">
-        ${availableOptions.map(opt => `<a href="#" data-target="${opt.target}" data-action="${opt.action}" data-shopid="${opt.shopId}">${opt.text}</a>`).join('')}
+        ${availableOptions.map(opt => `<a href="#" data-target="${opt.target}" data-action="${opt.action || ''}" data-shopid="${opt.shopId || ''}" data-puzzleid="${opt.puzzleId || ''}" data-choice="${opt.choice || ''}">${opt.text}</a>`).join('')}
       </nav>
     </article>
   `;
@@ -1014,9 +1113,13 @@ function renderPassage(passageName) {
       const target = e.target.getAttribute('data-target');
       const action = e.target.getAttribute('data-action');
       const shopId = e.target.getAttribute('data-shopid');
+      const puzzleId = e.target.getAttribute('data-puzzleid');
+      const choice = e.target.getAttribute('data-choice');
 
       if (action === 'shop') {
           renderShop(shopId);
+      } else if (action === 'puzzle') {
+          handlePuzzle(puzzleId, choice);
       } else {
           renderPassage(target);
       }
@@ -1088,7 +1191,7 @@ function buyItem(itemName, shopId) {
 function startCombat(monsterName) {
     let monster = { ...monsters[monsterName] };
     const storyDiv = document.getElementById('story');
-    let combatLog = `You are attacked by a ${monsterName}!`;
+    let combatLog = `A wild ${monsterName} appears!`;
 
     function renderCombatUI() {
         storyDiv.innerHTML = `
@@ -1128,7 +1231,7 @@ function startCombat(monsterName) {
 
     function handleMonsterAttack() {
         const monsterDamage = Math.max(0, monster.attack - getPlayerDefense());
-        player.stats.health = clamp(player.stats.health - monsterDamage);
+        player.stats.health = clamp(player.stats.health - monsterDamage, 0, player.maxStats.health);
         combatLog = `The ${monsterName} retaliates, hitting you for ${monsterDamage} damage.`;
 
         updateStats();
@@ -1143,8 +1246,7 @@ function startCombat(monsterName) {
     function handleFlee() {
         if (Math.random() > 0.5) {
             combatLog = "You successfully escaped!";
-            const previousPassage = Object.keys(player.visits).reverse()[1] || "Start";
-            renderPassage(previousPassage);
+            renderPassage(player.previousPassage);
         } else {
             combatLog = "You failed to escape!";
             renderCombatUI();
@@ -1157,7 +1259,7 @@ function startCombat(monsterName) {
         if(monster.gold) {
             player.gold += monster.gold;
         }
-        player.visits[player.currentPassage + "_defeated"] = true;
+        levelUp();
         combatLog = monster.deathText;
 
         const storyDiv = document.getElementById('story');
@@ -1168,12 +1270,17 @@ function startCombat(monsterName) {
               <p class="passage-text">${combatLog}<br>You gained ${monster.xp} XP and ${monster.gold || 0} gold.</p>
               <nav class="nav-buttons">
                 <a href="#" id="continue-btn">Continue</a>
+                <a href="#" id="leave-btn">Leave Area</a>
               </nav>
             </article>
         `;
         document.getElementById('continue-btn').addEventListener('click', e => {
             e.preventDefault();
             renderPassage(monster.nextPassage || player.currentPassage);
+        });
+        document.getElementById('leave-btn').addEventListener('click', e => {
+            e.preventDefault();
+            renderPassage(player.previousPassage);
         });
         updateAllUI();
     }
