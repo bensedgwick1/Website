@@ -3,193 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <title>Modern Twine Game with Stats Sidebar</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-
-  /* Reset & base */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 0;
-    font-family: 'Montserrat', sans-serif;
-    background: #121212;
-    color: #e0e0e0;
-    display: flex;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Sidebar */
-  #sidebar {
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    width: 280px;
-    background: #1f1f1f;
-    border-right: 3px solid #03dac6;
-    padding: 2rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    overflow-y: auto;
-  }
-  #sidebar h2 {
-    font-weight: 700;
-    font-size: 1.4rem;
-    color: #03dac6;
-    margin-bottom: 1rem;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid #03dac6;
-    padding-bottom: 0.25rem;
-  }
-  #visited-places {
-    flex-grow: 1;
-  }
-  #visited-places ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 240px;
-    overflow-y: auto;
-  }
-  #visited-places li {
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-  }
-
-  /* Character status bars */
-  .stat {
-    margin-bottom: 1rem;
-  }
-  .stat-label {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-    margin-bottom: 0.3rem;
-  }
-  .stat-bar {
-    background: #333;
-    border-radius: 10px;
-    height: 12px;
-    overflow: hidden;
-  }
-  .stat-fill {
-    height: 100%;
-    border-radius: 10px;
-    background: #03dac6;
-    transition: width 0.3s ease;
-  }
-  /* Different colors for each stat */
-  .stat-fill.health { background: #e63946; }
-  .stat-fill.mana { background: #457b9d; }
-  .stat-fill.energy { background: #f4a261; }
-  .stat-fill.happiness { background: #2a9d8f; }
-
-  /* Main content */
-  #content-wrapper {
-    margin-left: 280px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  header {
-    background: #1f1f1f;
-    padding: 1rem 2rem;
-    font-weight: 700;
-    font-size: 1.5rem;
-    text-align: center;
-    letter-spacing: 0.1em;
-    border-bottom: 2px solid #03dac6;
-    flex-shrink: 0;
-  }
-  main {
-    flex: 1;
-    max-width: 720px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    background: #222;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
-  }
-  .passage-title {
-    font-weight: 700;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #03dac6;
-    text-align: center;
-  }
-  .passage-image {
-    width: 100%;
-    max-height: 320px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 12px rgba(3, 218, 198, 0.5);
-  }
-  .passage-text {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-  .nav-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .nav-buttons a {
-    background: #03dac6;
-    color: #121212;
-    font-weight: 700;
-    text-decoration: none;
-    padding: 0.75rem 2rem;
-    border-radius: 30px;
-    transition: background 0.3s ease;
-    box-shadow: 0 4px 8px rgba(3, 218, 198, 0.6);
-  }
-  .nav-buttons a:hover {
-    background: #00bfa5;
-    box-shadow: 0 6px 16px rgba(0, 191, 165, 0.8);
-  }
-  @media (max-width: 768px) {
-    #sidebar {
-      position: relative;
-      width: 100%;
-      height: auto;
-      border-right: none;
-      border-bottom: 3px solid #03dac6;
-      padding: 1rem 1rem;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 1rem;
-      max-height: none;
-    }
-    #visited-places, #character-status {
-      flex: 1 1 45%;
-      max-height: none;
-      overflow: visible;
-    }
-    #content-wrapper {
-      margin-left: 0;
-      padding: 1rem 0;
-    }
-    main {
-      margin: 1rem auto;
-    }
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="sidebar" aria-label="Game sidebar with stats">
-  <section id="visited-places" aria-label="Visited places count">
-    <h2>Visited Places</h2>
-    <ul id="visit-list">
-      <!-- Dynamic list of places -->
-    </ul>
-  </section>
   <section id="character-status" aria-label="Character status">
     <h2>Character Status</h2>
     <div class="stat">
@@ -205,9 +23,29 @@
       <div class="stat-bar"><div id="energy-bar" class="stat-fill energy" style="width:100%"></div></div>
     </div>
     <div class="stat">
-      <div class="stat-label"><span>Happiness</span><span id="happiness-val">100</span></div>
-      <div class="stat-bar"><div id="happiness-bar" class="stat-fill happiness" style="width:100%"></div></div>
+        <div class="stat-label"><span>Happiness</span><span id="happiness-val">100</span></div>
+        <div class="stat-bar"><div id="happiness-bar" class="stat-fill happiness" style="width:100%"></div></div>
     </div>
+    <div class="stat">
+        <div class="stat-label"><span>Level</span><span id="level-val">1</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>XP</span><span id="xp-val">0</span></div>
+    </div>
+  </section>
+
+  <section id="inventory" aria-label="Player inventory">
+      <h2>Inventory</h2>
+      <ul id="inventory-list">
+          <!-- Dynamic list of items -->
+      </ul>
+  </section>
+
+  <section id="visited-places" aria-label="Visited places count">
+    <h2>Visited Places</h2>
+    <ul id="visit-list">
+      <!-- Dynamic list of places -->
+    </ul>
   </section>
 </div>
 
@@ -218,187 +56,7 @@
   </main>
 </div>
 
-<script>
-  // Data for passages
-  const passages = {
-    "Start": {
-      title: "Start",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-      text: "Welcome to your modern Twine adventure. You find yourself at the edge of a mysterious forest. Where do you want to go?",
-      options: [
-        { text: "Enter the forest", target: "Forest" },
-        { text: "Walk along the river", target: "River" }
-      ],
-      effects: { health: 0, mana: 0, energy: -5, happiness: 0 }
-    },
-    "Forest": {
-      title: "Enchanted Forest",
-      image: "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80",
-      text: "The forest is dense and alive with strange sounds. You see a glowing path leading deeper and a dark cave nearby.",
-      options: [
-        { text: "Follow the glowing path", target: "Path" },
-        { text: "Enter the dark cave", target: "Cave" },
-        { text: "Go back", target: "Start" }
-      ],
-      effects: { health: 0, mana: -10, energy: -10, happiness: 5 }
-    },
-    "River": {
-      title: "Calm River",
-      image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80",
-      text: "The river flows gently, reflecting the sky. You spot a small boat and a bridge crossing the water.",
-      options: [
-        { text: "Take the boat downstream", target: "Boat" },
-        { text: "Cross the bridge", target: "Bridge" },
-        { text: "Go back", target: "Start" }
-      ],
-      effects: { health: 5, mana: 5, energy: 0, happiness: 0 }
-    },
-    "Path": {
-      title: "Glowing Path",
-      image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80",
-      text: "Following the glowing path, you arrive at a beautiful clearing filled with sparkling flowers. It feels magical here.",
-      options: [
-        { text: "Pick a flower", target: "Flower" },
-        { text: "Rest in the clearing", target: "Rest" },
-        { text: "Return to forest", target: "Forest" }
-      ],
-      effects: { health: 10, mana: 5, energy: 10, happiness: 15 }
-    },
-    "Cave": {
-      title: "Dark Cave",
-      image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
-      text: "Inside the cave, it’s cold and echoing. You find mysterious ancient drawings on the walls.",
-      options: [
-        { text: "Explore deeper", target: "DeepCave" },
-        { text: "Leave the cave", target: "Forest" }
-      ],
-      effects: { health: -15, mana: -5, energy: -20, happiness: -5 }
-    },
-    "Boat": {
-      title: "Downstream Boat",
-      image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&w=800&q=80",
-      text: "You float down the river, feeling peaceful and watching the world pass by. Adventure continues another day.",
-      options: [
-        { text: "Restart", target: "Start" }
-      ],
-      effects: { health: 5, mana: 10, energy: 10, happiness: 10 }
-    },
-    "Bridge": {
-      title: "Across the Bridge",
-      image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80",
-      text: "Crossing the bridge, you discover a new path leading to unknown lands. What will you explore next?",
-      options: [
-        { text: "Restart", target: "Start" }
-      ],
-      effects: { health: 0, mana: 5, energy: 5, happiness: 5 }
-    },
-    "Flower": {
-      title: "Magical Flower",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-      text: "The flower glows softly in your hand, filling you with warmth and strength. You feel ready for anything.",
-      options: [
-        { text: "Return to clearing", target: "Path" }
-      ],
-      effects: { health: 20, mana: 10, energy: 5, happiness: 20 }
-    },
-    "Rest": {
-      title: "Peaceful Rest",
-      image: "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80",
-      text: "You rest in the clearing and feel a deep sense of calm. Sometimes, this is the greatest adventure.",
-      options: [
-        { text: "Return to clearing", target: "Path" }
-      ],
-      effects: { health: 30, mana: 20, energy: 30, happiness: 30 }
-    },
-    "DeepCave": {
-      title: "Deeper in the Cave",
-      image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
-      text: "You delve deeper and discover a hidden treasure. Your courage has paid off.",
-      options: [
-        { text: "Restart", target: "Start" }
-      ],
-      effects: { health: 50, mana: 20, energy: 40, happiness: 25 }
-    }
-  };
-
-  // Track visits
-  const visits = {};
-  // Character stats, max 100
-  let stats = {
-    health: 100,
-    mana: 100,
-    energy: 100,
-    happiness: 100
-  };
-
-  function clamp(value, min = 0, max = 100) {
-    return Math.min(max, Math.max(min, value));
-  }
-
-  // Update sidebar visit list
-  function updateVisitList() {
-    const ul = document.getElementById('visit-list');
-    ul.innerHTML = '';
-    for (const place in visits) {
-      const li = document.createElement('li');
-      li.textContent = `${place}: ${visits[place]}`;
-      ul.appendChild(li);
-    }
-  }
-
-  // Update character status bars
-  function updateStats() {
-    for (const stat in stats) {
-      const val = clamp(stats[stat]);
-      document.getElementById(`${stat}-val`).textContent = val;
-      document.getElementById(`${stat}-bar`).style.width = val + '%';
-    }
-  }
-
-  // Render passage content and update stats + visits
-  function renderPassage(passageName) {
-    const passage = passages[passageName];
-
-    // Track visit count
-    visits[passageName] = (visits[passageName] || 0) + 1;
-    updateVisitList();
-
-    // Apply passage effects on stats
-    if (passage.effects) {
-      stats.health = clamp(stats.health + passage.effects.health);
-      stats.mana = clamp(stats.mana + passage.effects.mana);
-      stats.energy = clamp(stats.energy + passage.effects.energy);
-      stats.happiness = clamp(stats.happiness + passage.effects.happiness);
-      updateStats();
-    }
-
-    const storyDiv = document.getElementById('story');
-    storyDiv.innerHTML = `
-      <article role="article" aria-label="${passage.title}">
-        <h1 class="passage-title">${passage.title}</h1>
-        <img class="passage-image" src="${passage.image}" alt="${passage.title} image" />
-        <p class="passage-text">${passage.text}</p>
-        <nav class="nav-buttons" role="navigation" aria-label="Choices">
-          ${passage.options.map(opt => `<a href="#" data-target="${opt.target}">${opt.text}</a>`).join('')}
-        </nav>
-      </article>
-    `;
-
-    // Add event listeners for navigation links
-    storyDiv.querySelectorAll('.nav-buttons a').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const target = e.target.getAttribute('data-target');
-        renderPassage(target);
-      });
-    });
-  }
-
-  // Initialize game
-  updateVisitList();
-  updateStats();
-  renderPassage("Start");
-</script>
+<script src="game.js"></script>
 
 </body>
 </html>

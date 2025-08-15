@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Modern Twine Game with Stats Sidebar</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+/* Reset & base */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0; padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  background: #121212;
+  color: #e0e0e0;
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Sidebar */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 280px;
+  background: #1f1f1f;
+  border-right: 3px solid #03dac6;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: auto;
+}
+#sidebar h2 {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #03dac6;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #03dac6;
+  padding-bottom: 0.25rem;
+}
+#visited-places {
+  flex-grow: 1;
+}
+#visited-places ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+#visited-places li {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* Character status bars */
+.stat {
+  margin-bottom: 1rem;
+}
+.stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+.stat-bar {
+  background: #333;
+  border-radius: 10px;
+  height: 12px;
+  overflow: hidden;
+}
+.stat-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: #03dac6;
+  transition: width 0.3s ease;
+}
+/* Different colors for each stat */
+.stat-fill.health { background: #e63946; }
+.stat-fill.mana { background: #457b9d; }
+.stat-fill.energy { background: #f4a261; }
+.stat-fill.happiness { background: #2a9d8f; }
+
+/* Main content */
+#content-wrapper {
+  margin-left: 280px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+header {
+  background: #1f1f1f;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-align: center;
+  letter-spacing: 0.1em;
+  border-bottom: 2px solid #03dac6;
+  flex-shrink: 0;
+}
+main {
+  flex: 1;
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: #222;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+}
+.passage-title {
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #03dac6;
+  text-align: center;
+}
+.passage-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(3, 218, 198, 0.5);
+}
+.passage-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.nav-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.nav-buttons a {
+  background: #03dac6;
+  color: #121212;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.75rem 2rem;
+  border-radius: 30px;
+  transition: background 0.3s ease;
+  box-shadow: 0 4px 8px rgba(3, 218, 198, 0.6);
+}
+.nav-buttons a:hover {
+  background: #00bfa5;
+  box-shadow: 0 6px 16px rgba(0, 191, 165, 0.8);
+}
+@media (max-width: 768px) {
+  #sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 3px solid #03dac6;
+    padding: 1rem 1rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-height: none;
+  }
+  #visited-places, #character-status {
+    flex: 1 1 45%;
+    max-height: none;
+    overflow: visible;
+  }
+  #content-wrapper {
+    margin-left: 0;
+    padding: 1rem 0;
+  }
+  main {
+    margin: 1rem auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar" aria-label="Game sidebar with stats">
+  <section id="character-status" aria-label="Character status">
+    <h2>Character Status</h2>
+    <div class="stat">
+      <div class="stat-label"><span>Health</span><span id="health-val">100</span></div>
+      <div class="stat-bar"><div id="health-bar" class="stat-fill health" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span>Mana</span><span id="mana-val">100</span></div>
+      <div class="stat-bar"><div id="mana-bar" class="stat-fill mana" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span>Energy</span><span id="energy-val">100</span></div>
+      <div class="stat-bar"><div id="energy-bar" class="stat-fill energy" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>Happiness</span><span id="happiness-val">100</span></div>
+        <div class="stat-bar"><div id="happiness-bar" class="stat-fill happiness" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>Level</span><span id="level-val">1</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>XP</span><span id="xp-val">0</span></div>
+    </div>
+  </section>
+
+  <section id="inventory" aria-label="Player inventory">
+      <h2>Inventory</h2>
+      <ul id="inventory-list">
+          <!-- Dynamic list of items -->
+      </ul>
+  </section>
+
+  <section id="visited-places" aria-label="Visited places count">
+    <h2>Visited Places</h2>
+    <ul id="visit-list">
+      <!-- Dynamic list of places -->
+    </ul>
+  </section>
+</div>
+
+<div id="content-wrapper">
+  <header>Testing Gen</header>
+  <main id="story" role="main" aria-live="polite" style="max-width:720px;margin:2rem auto;padding:0 1rem;">
+    <Fun stuff is being created here.>
+  </main>
+</div>
+
+<script>
+// --- DATA ---
+
+const passages = {
+  // --- STARTING AREA ---
+  "Start": {
+    title: "The Forgotten Valley",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    text: "You awaken in a lush, forgotten valley with no memory of how you arrived. A dense forest looms to the north, and a gentle river flows eastward.",
+    options: [
+      { text: "Enter the forest", target: "Forest" },
+      { text: "Follow the river", target: "River" }
+    ],
+    effects: { energy: -5 }
+  },
+  "Forest": {
+    title: "Enchanted Forest",
+    image: "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80",
+    text: "The ancient trees of the forest hum with a strange energy. You spot a faintly glowing path and a dark, foreboding cave.",
+    options: [
+      { text: "Follow the glowing path", target: "Path" },
+      { text: "Enter the dark cave", target: "Cave" },
+      { text: "Return to the valley", target: "Start" }
+    ],
+    effects: { mana: -5, energy: -10 }
+  },
+  "River": {
+    title: "Whispering River",
+    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80",
+    text: "The river whispers secrets as it flows over smooth stones. You see a rickety wooden bridge and a small, abandoned boat.",
+    options: [
+      { text: "Cross the bridge", target: "Crossroads" },
+      { text: "Take the boat", target: "Boat" },
+      { text: "Return to the valley", target: "Start" }
+    ],
+    effects: { happiness: 5 }
+  },
+  "Path": {
+    title: "Glowing Path",
+    image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80",
+    text: "The path leads you to a serene clearing filled with luminescent flowers. The air here feels pure and restorative.",
+    options: [
+      { text: "Pick a glowing petal", target: "Flower" },
+      { text: "Rest in the clearing", target: "Rest" },
+      { text: "Go back", target: "Forest" }
+    ],
+    effects: { health: 10, mana: 10, energy: 10, happiness: 10 }
+  },
+  "Cave": {
+    title: "Murky Cave",
+    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+    text: "The air in the cave is damp and cold. As you step inside, a monstrous, snarling rat leaps from the shadows!",
+    options: [], // Combat will generate options
+    monster: "Giant Rat"
+  },
+  "CaveInterior": {
+      title: "Cave Interior",
+      image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+      text: "With the rat defeated, you can now see ancient drawings on the walls, depicting a great city beyond the mountains.",
+      options: [
+        { text: "Explore deeper", target: "DeepCave" },
+        { text: "Leave the cave", target: "Forest" }
+      ],
+      effects: { xp: 10 }
+  },
+  "Boat": {
+    title: "Adrift",
+    image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&w=800&q=80",
+    text: "You climb into the small boat and push off into the current. The river pulls you gently downstream, away from the valley.",
+    options: [
+      { text: "Continue downstream", target: "RiverJourney" }
+    ],
+    effects: { energy: 10, happiness: 10 }
+  },
+    "RiverJourney": {
+    title: "Down the River",
+    image: "https://images.unsplash.com/photo-1505164294233-8b27cc3d34f9?auto=format&fit=crop&w=800&q=80",
+    text: "The river widens and slows as the landscape changes. The trees become twisted and the air grows heavy and humid. You are entering a swamp.",
+    options: [
+      { text: "Navigate the swamp", target: "Swamp" },
+      { text: "Try to paddle back", target: "River" }
+    ],
+    effects: { energy: -10, happiness: -5 }
+  },
+  "Swamp": {
+      title: "Murky Swamp",
+      image: "https://images.unsplash.com/photo-1504984392439-e4a8a044a86f?auto=format&fit=crop&w=800&q=80",
+      text: "The swamp is a maze of murky water and tangled roots. Something slithers beneath the surface. You spot a small, dilapidated shack on a patch of dry land.",
+      options: [
+          { text: "Investigate the shack", target: "Shack" },
+          { text: "Press on through the swamp", target: "SwampDanger" }
+      ]
+  },
+  "Shack": {
+      title: "The Hermit's Shack",
+      image: "https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=800&q=80",
+      text: "Inside the shack, you find a strange hermit who offers you a mysterious potion. 'It will help you on your way,' she cackles.",
+      options: [
+          { text: "Drink the potion", target: "Potion" },
+          { text: "Leave the shack", target: "Swamp" }
+      ]
+  },
+  "Potion": {
+      title: "A Strange Brew",
+      image: "https://images.unsplash.com/photo-1550482598-6b2a04a358c6?auto=format&fit=crop&w=800&q=80",
+      text: "You drink the potion. It tastes of moss and starlight. You feel... different.",
+      options: [
+          { text: "Thank the hermit", target: "Swamp" }
+      ],
+      effects: { mana: 20, happiness: -10, health: 10 }
+  },
+  "SwampDanger": {
+      title: "Swamp Lurker",
+      image: "https://images.unsplash.com/photo-1504984392439-e4a8a044a86f?auto=format&fit=crop&w=800&q=80",
+      text: "As you pole the boat through the murky water, a giant, slimy tentacle erupts from the depths and attacks!",
+      options: [],
+      monster: "Swamp Tentacle"
+  },
+  "SwampAftermath": {
+      title: "Out of the Swamp",
+      image: "https://images.unsplash.com/photo-1559825481-6d452d899f88?auto=format&fit=crop&w=800&q=80",
+      text: "You've defeated the creature and finally see a way out of the oppressive swamp. You emerge onto a muddy path leading towards the city.",
+      options: [
+          { text: "Follow the path", target: "Outskirts" }
+      ],
+      effects: { xp: 25 }
+  },
+  "Flower": {
+    title: "Magical Flower",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    text: "The petal glows warmly in your hand. You feel a surge of strength.",
+    options: [
+      { text: "Return to the clearing", target: "Path" }
+    ],
+    effects: { health: 20, mana: 10, happiness: 20 },
+    item: "Glowing Petal"
+  },
+  "Rest": {
+    title: "Peaceful Rest",
+    image: "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80",
+    text: "You rest in the clearing, feeling your wounds mend and your spirit lift. You are ready for the path ahead.",
+    options: [
+      { text: "Continue onward", target: "Path" }
+    ],
+    effects: { health: 50, mana: 30, energy: 40, happiness: 30 }
+  },
+  "DeepCave": {
+    title: "Hidden Cache",
+    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+    text: "Tucked away in a small alcove, you find a leather pouch containing an old, but shiny coin.",
+    options: [
+      { text: "Leave the cave", target: "Forest" }
+    ],
+    item: "Old Coin"
+  },
+
+  // --- THE JOURNEY ---
+  "Crossroads": {
+      title: "The Crossroads",
+      image: "https://images.unsplash.com/photo-1478860409698-8707f313ee8b?auto=format&fit=crop&w=800&q=80",
+      text: "Having crossed the river, you arrive at a crossroads. A signpost points in two directions: 'To the mountains' and 'To the plains'.",
+      options: [
+          { text: "Take the mountain path", target: "MountainPath" },
+          { text: "Take the plains path", target: "PlainsPath" },
+          { text: "Go back across the bridge", target: "River" }
+      ]
+  },
+  "MountainPath": {
+      title: "The Winding Trail",
+      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80",
+      text: "The path into the mountains is steep and treacherous. The air grows thin and cold.",
+      options: [
+          { text: "Press on", target: "MountainPass" }
+      ],
+      effects: { energy: -20, happiness: -5 }
+  },
+  "MountainPass": {
+      title: "The Skeleton's Grip",
+      image: "https://images.unsplash.com/photo-1564769719542-736d4a033e48?auto=format&fit=crop&w=800&q=80",
+      text: "At the highest point of the pass, you find the remains of a long-dead adventurer, their skeletal hand still clutching a rusty sword.",
+      options: [
+          { text: "Take the sword", target: "MountainPass_Sword" },
+          { text: "Continue without it", target: "MountainExit" }
+      ]
+  },
+  "MountainPass_Sword": {
+      title: "A Rusty Blade",
+      image: "https://images.unsplash.com/photo-1564769719542-736d4a033e48?auto=format&fit=crop&w=800&q=80",
+      text: "You pry the sword from the skeleton's fingers. It's old and notched, but better than nothing.",
+      options: [
+          { text: "Descend the mountain", target: "MountainExit" }
+      ],
+      item: "Rusty Sword"
+  },
+  "MountainExit": {
+      title: "Mountain Vista",
+      image: "https://images.unsplash.com/photo-1508921914833-2b2c911b3394?auto=format&fit=crop&w=800&q=80",
+      text: "As you descend, the clouds part, revealing a breathtaking view of a sprawling city in the distance. Your destination.",
+      options: [
+          { text: "Head towards the city", target: "Outskirts" }
+      ]
+  },
+  "PlainsPath": {
+      title: "The Endless Plains",
+      image: "https://images.unsplash.com/photo-1473115439229-a75dd3b41334?auto=format&fit=crop&w=800&q=80",
+      text: "An ocean of grass stretches before you under a wide-open sky. The journey is long, and you feel exposed.",
+      options: [
+          { text: "Scan the horizon", target: "PlainsEncounter" }
+      ],
+      effects: { energy: -15 }
+  },
+  "PlainsEncounter": {
+      title: "A Lone Wolf",
+      image: "https://images.unsplash.com/photo-1547471080-774b9b013a3b?auto=format&fit=crop&w=800&q=80",
+      text: "Your eyes catch movement. A lean, hungry-looking wolf is stalking you from the tall grass.",
+      options: [],
+      monster: "Wolf"
+  },
+  "PlainsAftermath": {
+      title: "Victory on the Plains",
+      image: "https://images.unsplash.com/photo-1473115439229-a75dd3b41334?auto=format&fit=crop&w=800&q=80",
+      text: "The wolf lies defeated. The plains fall silent once more. In the distance, you see what looks like a small farmstead.",
+      options: [
+          { text: "Head for the farmstead", target: "Farmstead" }
+      ],
+      effects: { xp: 20 }
+  },
+  "Farmstead": {
+      title: "The Old Farmstead",
+      image: "https://images.unsplash.com/photo-1598963972456-538965c69348?auto=format&fit=crop&w=800&q=80",
+      text: "You arrive at a small, peaceful farm. An old farmer looks up from his work, leaning on his rake.",
+      options: [
+          { text: "Ask for a place to rest", target: "FarmsteadRest" },
+          { text: "Ask about the city", target: "FarmsteadCity" },
+          { text: "Leave", target: "Outskirts" }
+      ],
+      effects: { happiness: 10 }
+  },
+  "FarmsteadRest": {
+      title: "A Moment's Peace",
+      image: "https://images.unsplash.com/photo-1598963972456-538965c69348?auto=format&fit=crop&w=800&q=80",
+      text: "The farmer offers you a bed in his barn. You get a solid night's sleep, feeling much better for it.",
+      options: [
+          { text: "Thank the farmer and leave", target: "Outskirts" }
+      ],
+      effects: { health: 40, energy: 50 }
+  },
+  "FarmsteadCity": {
+      title: "A Farmer's Tale",
+      image: "https://images.unsplash.com/photo-1598963972456-538965c69348?auto=format&fit=crop&w=800&q=80",
+      text: "'The city?' he says, wiping his brow. 'That's Silverhaven. Big walls, bigger rules. The guards at the main gate can be... particular. Be careful, stranger.'",
+      options: [
+          { text: "Thank him for the warning", target: "Outskirts" }
+      ]
+  },
+  "Outskirts": {
+      title: "The City Outskirts",
+      image: "https://images.unsplash.com/photo-1519819224351-f1bf141e6a25?auto=format&fit=crop&w=800&q=80",
+      text: "You're on the outskirts of the great city. You can see the towering walls and hear the distant sounds of civilization. The main gate is just ahead.",
+      options: [
+          { text: "Approach the main gate", target: "CityGates" }
+      ]
+  },
+  "CityGates": {
+      title: "The Gates of Silverhaven",
+      image: "https://images.unsplash.com/photo-1613425116127-14223c72de88?auto=format&fit=crop&w=800&q=80",
+      text: "Two imposing guards block the gate. One steps forward, hand on his sword. 'Halt! State your business in Silverhaven.'",
+      options: [
+          { text: "Show them the Old Coin", target: "CityEntry", condition: { type: "hasItem", item: "Old Coin"} },
+          { text: "Try to bribe the guards (25 Gold)", target: "CityEntryBribe", condition: { type: "hasGold", amount: 25 } },
+          { text: "Leave", target: "Outskirts" }
+      ]
+  },
+    "CityEntry": {
+        title: "A Surprising Welcome",
+        image: "https://images.unsplash.com/photo-1613425116127-14223c72de88?auto=format&fit=crop&w=800&q=80",
+        text: "You present the Old Coin. The guard's eyes widen. 'A Founder's Coin! My apologies, citizen. Welcome to Silverhaven. The city is open to you.' The gates swing open.",
+        options: [
+            { text: "Enter the city", target: "CitySquare" }
+        ],
+        effects: { happiness: 20 }
+    },
+    "CityEntryBribe": {
+        title: "Greasing the Palms",
+        image: "https://images.unsplash.com/photo-1613425116127-14223c72de88?auto=format&fit=crop&w=800&q=80",
+        text: "You discreetly pass 25 Gold to the guard. He makes it disappear and nods. 'Alright, move along. Don't cause any trouble.' The gates open just enough for you to slip through.",
+        options: [
+            { text: "Enter the city", target: "CitySquare" }
+        ],
+        effects: { gold: -25, happiness: -5 }
+    },
+    "CitySquare": {
+        title: "Silverhaven Square",
+        image: "https://images.unsplash.com/photo-1564594245192-381467475a7c?auto=format&fit=crop&w=800&q=80",
+        text: "You step into a bustling city square. Merchants hawk their wares, children chase pigeons, and a grand fountain bubbles at the center. The city is alive with possibility.",
+        options: [
+            { text: "Visit the market", target: "Market" },
+            { text: "Find the tavern", target: "Tavern" },
+            { text: "Look for the guardhouse", target: "Guardhouse" },
+            { text: "Investigate the ominous alley", target: "CatacombsEntrance" }
+        ]
+    },
+    "Market": {
+        title: "The Gilded Goods",
+        image: "https://images.unsplash.com/photo-1580915228225-4c6a43f8df85?auto=format&fit=crop&w=800&q=80",
+        text: "The market is a riot of sights, sounds, and smells. A blacksmith sells weapons and armor, an alchemist offers potions, and a general goods vendor has a bit of everything.",
+        options: [
+            { text: "Visit the Blacksmith", action: "shop", shopId: "blacksmith" },
+            { text: "Visit the Alchemist", action: "shop", shopId: "alchemist" },
+            { text: "Return to the Square", target: "CitySquare" }
+        ]
+    },
+    "Tavern": {
+        title: "The Rusty Flagon",
+        image: "https://images.unsplash.com/photo-1543007185-3220260526c7?auto=format&fit=crop&w=800&q=80",
+        text: "The tavern is warm and filled with the sound of laughter and lute music. You can buy a drink, rent a room to rest, or listen for rumors.",
+        options: [
+            { text: "Buy a drink (2 Gold)", target: "TavernDrink", condition: { type: "hasGold", amount: 2 } },
+            { text: "Rent a room (15 Gold)", target: "TavernRest", condition: { type: "hasGold", amount: 15 } },
+            { text: "Listen for rumors", target: "TavernRumors" },
+            { text: "Leave", target: "CitySquare" }
+        ]
+    },
+    "TavernDrink": {
+        title: "A Quick Drink",
+        image: "https://images.unsplash.com/photo-1543007185-3220260526c7?auto=format&fit=crop&w=800&q=80",
+        text: "You slide a couple of coins to the barkeep, who serves you a frothy ale. It's not the best you've ever had, but it lifts your spirits.",
+        options: [
+            { text: "Back to the bar", target: "Tavern" }
+        ],
+        effects: { gold: -2, happiness: 10, energy: 5 }
+    },
+    "TavernRest": {
+        title: "A Soft Bed",
+        image: "https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=800&q=80",
+        text: "You pay for a room and sink into the surprisingly comfortable bed. The night passes without incident, and you wake feeling completely refreshed.",
+        options: [
+            { text: "Back to the bar", target: "Tavern" }
+        ],
+        action: "fullHeal"
+    },
+    "TavernRumors": {
+        title: "Whispers and Rumors",
+        image: "https://images.unsplash.com/photo-1543007185-3220260526c7?auto=format&fit=crop&w=800&q=80",
+        text: "You lean against the bar and listen to the chatter around you...",
+        action: "random",
+        options: [
+            { target: "Rumor1" },
+            { target: "Rumor2" },
+            { target: "Rumor3" }
+        ]
+    },
+    "Rumor1": {
+        title: "The Skeletal Knight",
+        text: "A grizzled prospector whispers about the catacombs. 'They say a skeletal knight guards the lower levels... wields a blade of pure shadow.'",
+        options: [{ text: "Back to the bar", target: "Tavern" }]
+    },
+    "Rumor2": {
+        title: "The Alchemist's Secret",
+        text: "Two merchants are talking about the alchemist. 'She's been buying up all the silverleaf in the region. Rumor is, she's working on a potion of true invisibility.'",
+        options: [{ text: "Back to the bar", target: "Tavern" }]
+    },
+    "Rumor3": {
+        title: "The Beggar's Plea",
+        text: "A beggar near the door mutters about a lost family heirloom. 'It was a simple silver locket... but it was everything to me. It must be somewhere in the catacombs.'",
+        options: [{ text: "Back to the bar", target: "Tavern" }]
+    },
+    "Guardhouse": {
+        title: "Silverhaven Guardhouse",
+        image: "https://images.unsplash.com/photo-1561049289-7244c78093c3?auto=format&fit=crop&w=800&q=80",
+        text: "The guardhouse is a stern stone building. Guards in shining armor drill in the courtyard. It doesn't look like a place for idle hands.",
+        options: [
+            { text: "Leave", target: "CitySquare" }
+        ]
+    },
+    "CatacombsEntrance": {
+        title: "The Sunken Alley",
+        image: "https://images.unsplash.com/photo-1532371950395-19d5cda77666?auto=format&fit=crop&w=800&q=80",
+        text: "At the back of a dark, narrow alley, you find a heavy iron grate set into the cobblestones. A cold draft seeps from below, carrying the smell of dust and death. This must be the entrance to the catacombs.",
+        options: [
+            { text: "Descend into the darkness", target: "Catacombs_Level1_Start" },
+            { text: "Leave the alley", target: "CitySquare" }
+        ]
+    },
+    // --- CATACOMBS LEVEL 1 ---
+    "Catacombs_Level1_Start": {
+        title: "The First Descent",
+        image: "https://images.unsplash.com/photo-1546156923-45a762492a28?auto=format&fit=crop&w=800&q=80",
+        text: "You descend a crumbling stone staircase into the darkness. The air is stale and thick with the silence of the dead. The passage ahead splits.",
+        options: [
+            { text: "Go left", target: "Catacombs_L1_Hallway" },
+            { text: "Go right", target: "Catacombs_L1_SarcophagusRoom" },
+            { text: "Climb back to the city", target: "CitySquare" }
+        ]
+    },
+    "Catacombs_L1_Hallway": {
+        title: "Dusty Hallway",
+        image: "https://images.unsplash.com/photo-1546156923-45a762492a28?auto=format&fit=crop&w=800&q=80",
+        text: "A long hallway stretches before you, lined with empty burial niches. The sound of rattling bones echoes from the far end.",
+        options: [
+            { text: "Proceed cautiously", target: "Catacombs_L1_SkeletonEncounter" },
+            { text: "Go back", target: "Catacombs_Level1_Start" }
+        ]
+    },
+    "Catacombs_L1_SkeletonEncounter": {
+        title: "Rattling Bones",
+        monster: "Skeleton",
+        text: "As you move down the hall, a skeleton animated by dark magic lurches out of a niche, its empty eye sockets fixed on you.",
+        options: []
+    },
+    "Catacombs_L1_DeadEnd": {
+        title: "A Dead End",
+        image: "https://images.unsplash.com/photo-1546156923-45a762492a28?auto=format&fit=crop&w=800&q=80",
+        text: "The hallway ends in a collapse. Searching the rubble, you find a small, ornate key.",
+        item: "Rusted Key",
+        options: [
+            { text: "Go back", target: "Catacombs_L1_Hallway" }
+        ]
+    },
+    "Catacombs_L1_SarcophagusRoom": {
+        title: "Sarcophagus Room",
+        image: "https://images.unsplash.com/photo-1517984928543-85d02a2656a8?auto=format&fit=crop&w=800&q=80",
+        text: "This circular room is dominated by a large, stone sarcophagus. On the far side is a heavy, rusted iron door.",
+        options: [
+            { text: "Try to open the sarcophagus", target: "Catacombs_L1_ZombieEncounter" },
+            { text: "Try the iron door", target: "Catacombs_L1_LockedDoor" },
+            { text: "Go back", target: "Catacombs_Level1_Start" }
+        ]
+    },
+    "Catacombs_L1_ZombieEncounter": {
+        title: "The Lid Grinds Open",
+        monster: "Zombie",
+        text: "With a great effort, you push the lid of the sarcophagus aside. The groaning, preserved corpse of a long-dead warrior sits up and lunges at you!",
+        options: []
+    },
+    "Catacombs_L1_EmptySarcophagus": {
+        title: "An Empty Tomb",
+        image: "https://images.unsplash.com/photo-1517984928543-85d02a2656a8?auto=format&fit=crop&w=800&q=80",
+        text: "The zombie is defeated. You look inside the sarcophagus, but it is empty save for dust and cobwebs.",
+        options: [
+            { text: "Try the iron door", target: "Catacombs_L1_LockedDoor" },
+            { text: "Go back", target: "Catacombs_Level1_Start" }
+        ]
+    },
+    "Catacombs_L1_LockedDoor": {
+        title: "The Iron Door",
+        image: "https://images.unsplash.com/photo-1574933934529-3a13375753a8?auto=format&fit=crop&w=800&q=80",
+        text: "The large iron door is sealed shut with a heavy, rusted lock.",
+        options: [
+            { text: "Use the Rusted Key", target: "Catacombs_L1_BossRoom", condition: { type: "hasItem", item: "Rusted Key" } },
+            { text: "Leave the door", target: "Catacombs_L1_SarcophagusRoom" }
+        ]
+    },
+    "Catacombs_L1_BossRoom": {
+        title: "The Knight's Antechamber",
+        image: "https://images.unsplash.com/photo-1574933934529-3a8a13375753a8?auto=format&fit=crop&w=800&q=80",
+        text: "The key turns with a loud CLUNK. The door swings open into a large, vaulted chamber. In the center, a towering skeleton in plate armor rises to its feet, drawing a greatsword that seems to be forged from shadows.",
+        monster: "Skeletal Knight",
+        options: []
+    },
+    "Catacombs_L1_Victory": {
+        title: "The Knight's Defeat",
+        image: "https://images.unsplash.com/photo-1574933934529-3a8a13375753a8?auto=format&fit=crop&w=800&q=80",
+        text: "The Skeletal Knight shatters into a pile of dust and cursed armor. Behind its throne, you see a gleaming sword and a passage leading deeper into the catacombs.",
+        item: "Shadow Blade",
+        options: [
+            { text: "Take the Shadow Blade", target: "Catacombs_L1_Loot" },
+            { text: "Descend to the next level", target: "Catacombs_Level2_Start" }
+        ]
+    }
+};
+
+const items = {
+    "Rusty Sword": { type: "weapon", attack: 5, description: "An old and notched, but serviceable sword.", value: 10 },
+    "Iron Sword": { type: "weapon", attack: 10, description: "A simple but sturdy iron sword.", value: 50 },
+    "Shadow Blade": { type: "weapon", attack: 20, description: "A blade forged from shadows, humming with dark energy.", value: 200 },
+    "Leather Armor": { type: "armor", defense: 5, description: "Hardened leather armor.", value: 40 },
+    "Rusted Key": { type: "key", description: "A small, ornate key, covered in rust." },
+    "Glowing Petal": { type: "trinket", description: "Glows with a soft, warm light.", value: 5 },
+    "Old Coin": { type: "quest", description: "A shiny coin from a forgotten era.", value: 0 },
+    "Health Potion": { type: "potion", effect: "health", amount: 30, description: "A vial of red liquid that restores health.", value: 20 }
+};
+
+const shops = {
+    "blacksmith": {
+        name: "The Steel Sentinel",
+        inventory: ["Iron Sword", "Leather Armor"]
+    },
+    "alchemist": {
+        name: "The Bubbling Beaker",
+        inventory: ["Health Potion"]
+    }
+}
+
+const monsters = {
+    "Giant Rat": {
+        health: 30,
+        attack: 5,
+        xp: 10,
+        gold: 5,
+        image: "https://images.unsplash.com/photo-1599669466277-681419a48919?auto=format&fit=crop&w=800&q=80",
+        deathText: "The giant rat squeals and collapses.",
+        nextPassage: "CaveInterior"
+    },
+    "Wolf": {
+        health: 50,
+        attack: 8,
+        xp: 20,
+        gold: 10,
+        image: "https://images.unsplash.com/photo-1547471080-774b9b013a3b?auto=format&fit=crop&w=800&q=80",
+        deathText: "The wolf whimpers and falls still.",
+        nextPassage: "PlainsAftermath"
+    },
+    "Swamp Tentacle": {
+        health: 70,
+        attack: 12,
+        xp: 25,
+        gold: 15,
+        image: "https://images.unsplash.com/photo-1504984392439-e4a8a044a86f?auto=format&fit=crop&w=800&q=80",
+        deathText: "The tentacle recoils with a gurgle and sinks back into the murky water.",
+        nextPassage: "SwampAftermath"
+    },
+    "Skeleton": {
+        health: 40,
+        attack: 10,
+        xp: 15,
+        gold: 8,
+        image: "https://images.unsplash.com/photo-1564769719542-736d4a033e48?auto=format&fit=crop&w=800&q=80",
+        deathText: "The skeleton clatters into a pile of bones.",
+        nextPassage: "Catacombs_L1_DeadEnd"
+    },
+    "Zombie": {
+        health: 60,
+        attack: 8,
+        xp: 20,
+        gold: 12,
+        image: "https://images.unsplash.com/photo-1580985290748-5246a4821a0a?auto=format&fit=crop&w=800&q=80",
+        deathText: "The zombie groans and falls silent.",
+        nextPassage: "Catacombs_L1_EmptySarcophagus"
+    },
+    "Skeletal Knight": {
+        health: 100,
+        attack: 15,
+        xp: 50,
+        gold: 50,
+        image: "https://images.unsplash.com/photo-1574933934529-3a8a13375753a8?auto=format&fit=crop&w=800&q=80",
+        deathText: "The Skeletal Knight shatters into a pile of dust and cursed armor.",
+        nextPassage: "Catacombs_L1_Victory"
+    }
+};
+
+// --- GAME LOGIC ---
+
+let player = {};
+
+function initializePlayer() {
+    player = {
+        stats: { health: 100, mana: 80, energy: 100, happiness: 50 },
+        baseAttack: 5,
+        defense: 0,
+        level: 1,
+        xp: 0,
+        gold: 20,
+        inventory: [],
+        equipment: { weapon: null, armor: null },
+        visits: {},
+        currentPassage: "Start"
+    };
+}
+
+function getPlayerAttack() {
+    let attack = player.baseAttack;
+    if (player.equipment.weapon && items[player.equipment.weapon]) {
+        attack += items[player.equipment.weapon].attack;
+    }
+    return attack;
+}
+
+function getPlayerDefense() {
+    let defense = player.defense;
+    if (player.equipment.armor && items[player.equipment.armor]) {
+        defense += items[player.equipment.armor].defense;
+    }
+    return defense;
+}
+
+function clamp(value, min = 0, max = 100) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function updateAllUI() {
+    updateStats();
+    updateVisitList();
+    updateInventory();
+}
+
+function updateStats() {
+  for (const stat in player.stats) {
+    const val = clamp(player.stats[stat]);
+    document.getElementById(`${stat}-val`).textContent = val;
+    document.getElementById(`${stat}-bar`).style.width = val + '%';
+  }
+  document.getElementById('level-val').textContent = player.level;
+  document.getElementById('xp-val').textContent = player.xp;
+  // Assuming you add a gold display element
+  // document.getElementById('gold-val').textContent = player.gold;
+}
+
+function updateInventory() {
+    const ul = document.getElementById('inventory-list');
+    ul.innerHTML = '';
+    if (player.inventory.length === 0) {
+        ul.innerHTML = '<li>Empty</li>';
+    } else {
+        player.inventory.forEach(itemName => {
+            const li = document.createElement('li');
+            let text = itemName;
+            if (player.equipment.weapon === itemName || player.equipment.armor === itemName) {
+                text += " (Equipped)";
+            }
+            li.textContent = text;
+            ul.appendChild(li);
+        });
+    }
+}
+
+function updateVisitList() {
+  const ul = document.getElementById('visit-list');
+  ul.innerHTML = '';
+  Object.keys(player.visits).forEach(place => {
+      if (!place.endsWith("_defeated")) {
+        const li = document.createElement('li');
+        li.textContent = `${passages[place] ? passages[place].title : place}`;
+        ul.appendChild(li);
+      }
+  });
+}
+
+function showDeathScreen() {
+    const storyDiv = document.getElementById('story');
+    storyDiv.innerHTML = `
+        <article role="article" aria-label="You Died">
+            <h1 class="passage-title">You Have Died</h1>
+            <img class="passage-image" src="https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?auto=format&fit=crop&w=800&q=80" alt="Death image" />
+            <p class="passage-text">Your adventure has come to a premature end. But every end is a new beginning.</p>
+            <nav class="nav-buttons" role="navigation" aria-label="Choices">
+                <a href="#" data-target="Start">Restart</a>
+            </nav>
+        </article>
+    `;
+    storyDiv.querySelector('a').addEventListener('click', e => {
+        e.preventDefault();
+        restartGame();
+    });
+}
+
+function restartGame() {
+    initializePlayer();
+    updateAllUI();
+    renderPassage("Start");
+}
+
+function checkCondition(condition) {
+    if (!condition) return true;
+
+    if (condition.type === "hasItem" && player.inventory.includes(condition.item)) {
+        return true;
+    }
+    if (condition.type === "hasGold" && player.gold >= condition.amount) {
+        return true;
+    }
+    return false;
+}
+
+function renderPassage(passageName) {
+  player.currentPassage = passageName;
+  const passage = passages[passageName];
+
+  if (!passage) {
+      console.error("Passage not found: " + passageName);
+      // Fallback to a safe passage
+      renderPassage("Start");
+      return;
+  }
+
+  // Handle special actions
+  if (passage.action) {
+      switch (passage.action) {
+          case "fullHeal":
+              player.stats.health = 100;
+              player.stats.mana = 100;
+              player.stats.energy = 100;
+              player.gold -= 15; // Cost of room
+              break;
+          case "random":
+              const randomOption = passage.options[Math.floor(Math.random() * passage.options.length)];
+              const parentText = passage.text;
+              const childPassage = passages[randomOption.target];
+              const storyDiv = document.getElementById('story');
+              storyDiv.innerHTML = `
+                <article role="article" aria-label="${childPassage.title}">
+                  <h1 class="passage-title">${childPassage.title}</h1>
+                  <img class="passage-image" src="${passage.image}" alt="${passage.title} image" />
+                  <p class="passage-text">${parentText}<br><br><em>"${childPassage.text}"</em></p>
+                  <nav class="nav-buttons" role="navigation" aria-label="Choices">
+                    ${childPassage.options.map(opt => `<a href="#" data-target="${opt.target}">${opt.text}</a>`).join('')}
+                  </nav>
+                </article>
+              `;
+              storyDiv.querySelector('a').addEventListener('click', e => {
+                  e.preventDefault();
+                  renderPassage(e.target.getAttribute('data-target'));
+              });
+              updateAllUI();
+              return;
+      }
+  }
+
+
+  if (passageName === "Start" && Object.keys(player.visits).length > 0) {
+      restartGame();
+      return;
+  }
+
+  if (!player.visits[passageName]) {
+      player.visits[passageName] = 0;
+  }
+  player.visits[passageName]++;
+
+  if (passage.effects) {
+      for(const effect in passage.effects) {
+          if(player.stats[effect] !== undefined) {
+              player.stats[effect] = clamp(player.stats[effect] + passage.effects[effect]);
+          } else if (player[effect] !== undefined) {
+              player[effect] += passage.effects[effect];
+          }
+      }
+  }
+
+  if (passage.item && !player.inventory.includes(passage.item)) {
+      player.inventory.push(passage.item);
+      const itemData = items[passage.item];
+      if(itemData.type === 'weapon') {
+          player.equipment.weapon = passage.item;
+      } else if (itemData.type === 'armor') {
+          player.equipment.armor = passage.item;
+      }
+  }
+
+  updateAllUI();
+
+  if (player.stats.health <= 0) {
+      showDeathScreen();
+      return;
+  }
+
+  const monsterName = passage.monster;
+  if (monsterName && !player.visits[passageName + "_defeated"]) {
+      startCombat(monsterName);
+      return;
+  }
+
+  const storyDiv = document.getElementById('story');
+  const availableOptions = passage.options.filter(opt => checkCondition(opt.condition));
+
+  storyDiv.innerHTML = `
+    <article role="article" aria-label="${passage.title}">
+      <h1 class="passage-title">${passage.title}</h1>
+      <img class="passage-image" src="${passage.image}" alt="${passage.title} image" />
+      <p class="passage-text">${passage.text}</p>
+      <nav class="nav-buttons" role="navigation" aria-label="Choices">
+        ${availableOptions.map(opt => `<a href="#" data-target="${opt.target}" data-action="${opt.action}" data-shopid="${opt.shopId}">${opt.text}</a>`).join('')}
+      </nav>
+    </article>
+  `;
+
+  storyDiv.querySelectorAll('.nav-buttons a').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = e.target.getAttribute('data-target');
+      const action = e.target.getAttribute('data-action');
+      const shopId = e.target.getAttribute('data-shopid');
+
+      if (action === 'shop') {
+          renderShop(shopId);
+      } else {
+          renderPassage(target);
+      }
+    });
+  });
+}
+
+function renderShop(shopId) {
+    const shop = shops[shopId];
+    const storyDiv = document.getElementById('story');
+    let shopItemsHtml = "";
+
+    shop.inventory.forEach(itemName => {
+        const item = items[itemName];
+        if (!player.inventory.includes(itemName)) {
+            shopItemsHtml += `<li>${itemName} - ${item.description} (${item.value} Gold) <button class="buy-btn" data-item="${itemName}">Buy</button></li>`;
+        }
+    });
+
+    if (shopItemsHtml === "") {
+        shopItemsHtml = "<li>You've bought everything I have!</li>";
+    }
+
+    storyDiv.innerHTML = `
+        <article role="article" aria-label="${shop.name}">
+            <h1 class="passage-title">${shop.name}</h1>
+            <div class="passage-text">
+                <p>Welcome! What can I get for you? (You have ${player.gold} Gold)</p>
+                <ul>${shopItemsHtml}</ul>
+            </div>
+            <nav class="nav-buttons">
+                <a href="#" id="leave-shop-btn">Leave</a>
+            </nav>
+        </article>
+    `;
+
+    document.getElementById('leave-shop-btn').addEventListener('click', e => {
+        e.preventDefault();
+        renderPassage('Market');
+    });
+
+    storyDiv.querySelectorAll('.buy-btn').forEach(button => {
+        button.addEventListener('click', e => {
+            e.preventDefault();
+            const itemName = e.target.getAttribute('data-item');
+            buyItem(itemName, shopId);
+        });
+    });
+}
+
+function buyItem(itemName, shopId) {
+    const item = items[itemName];
+    if (player.gold >= item.value) {
+        player.gold -= item.value;
+        player.inventory.push(itemName);
+        if (item.type === 'weapon') {
+            player.equipment.weapon = itemName;
+        } else if (item.type === 'armor') {
+            player.equipment.armor = itemName;
+        }
+        updateAllUI();
+        renderShop(shopId);
+    } else {
+        alert("Not enough gold!");
+    }
+}
+
+
+function startCombat(monsterName) {
+    let monster = { ...monsters[monsterName] };
+    const storyDiv = document.getElementById('story');
+    let combatLog = `You are attacked by a ${monsterName}!`;
+
+    function renderCombatUI() {
+        storyDiv.innerHTML = `
+            <article role="article" aria-label="Combat with ${monsterName}">
+                <h1 class="passage-title">In Combat!</h1>
+                <img class="passage-image" src="${monster.image}" alt="${monsterName} image" />
+                <div class="passage-text">
+                    <p><strong>${monsterName}</strong> | Health: ${monster.health}</p>
+                    <p><strong>You</strong> | Health: ${player.stats.health}</p>
+                    <hr>
+                    <p>${combatLog}</p>
+                </div>
+                <nav class="nav-buttons" role="navigation" aria-label="Combat Choices">
+                    <a href="#" id="attack-btn">Attack</a>
+                    <a href="#" id="flee-btn">Flee</a>
+                </nav>
+            </article>
+        `;
+
+        document.getElementById('attack-btn').addEventListener('click', e => { e.preventDefault(); handlePlayerAttack(); });
+        document.getElementById('flee-btn').addEventListener('click', e => { e.preventDefault(); handleFlee(); });
+    }
+
+    function handlePlayerAttack() {
+        const playerDamage = getPlayerAttack();
+        monster.health -= playerDamage;
+        combatLog = `You strike the ${monsterName} for ${playerDamage} damage.`;
+
+        if (monster.health <= 0) {
+            winCombat();
+            return;
+        }
+
+        renderCombatUI();
+        setTimeout(handleMonsterAttack, 1000);
+    }
+
+    function handleMonsterAttack() {
+        const monsterDamage = Math.max(0, monster.attack - getPlayerDefense());
+        player.stats.health = clamp(player.stats.health - monsterDamage);
+        combatLog = `The ${monsterName} retaliates, hitting you for ${monsterDamage} damage.`;
+
+        updateStats();
+
+        if (player.stats.health <= 0) {
+            showDeathScreen();
+            return;
+        }
+        renderCombatUI();
+    }
+
+    function handleFlee() {
+        if (Math.random() > 0.5) {
+            combatLog = "You successfully escaped!";
+            const previousPassage = Object.keys(player.visits).reverse()[1] || "Start";
+            renderPassage(previousPassage);
+        } else {
+            combatLog = "You failed to escape!";
+            renderCombatUI();
+            setTimeout(handleMonsterAttack, 1000);
+        }
+    }
+
+    function winCombat() {
+        player.xp += monster.xp;
+        if(monster.gold) {
+            player.gold += monster.gold;
+        }
+        player.visits[player.currentPassage + "_defeated"] = true;
+        combatLog = monster.deathText;
+
+        const storyDiv = document.getElementById('story');
+        storyDiv.innerHTML = `
+            <article role="article" aria-label="Victory">
+              <h1 class="passage-title">Victory!</h1>
+              <img class="passage-image" src="${monster.image}" alt="${monsterName} image" />
+              <p class="passage-text">${combatLog}<br>You gained ${monster.xp} XP and ${monster.gold || 0} gold.</p>
+              <nav class="nav-buttons">
+                <a href="#" id="continue-btn">Continue</a>
+              </nav>
+            </article>
+        `;
+        document.getElementById('continue-btn').addEventListener('click', e => {
+            e.preventDefault();
+            renderPassage(monster.nextPassage || player.currentPassage);
+        });
+        updateAllUI();
+    }
+
+    renderCombatUI();
+}
+
+function initializeGame() {
+    initializePlayer();
+    updateAllUI();
+    renderPassage("Start");
+}
+
+// --- START GAME ---
+initializeGame();
+</script>
+</body>
+</html>
