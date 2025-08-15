@@ -223,6 +223,14 @@ main {
       <!-- Dynamic list of places -->
     </ul>
   </section>
+
+  <section id="game-actions" aria-label="Game Actions">
+    <h2>Game Actions</h2>
+    <div class="nav-buttons" style="display: block;">
+        <a href="#" id="save-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">Save Game</a>
+        <a href="#" id="load-btn" style="display: block; width: 100%; text-align: center;">Load Game</a>
+    </div>
+  </section>
 </div>
 
 <div id="content-wrapper">
@@ -878,6 +886,34 @@ function initializePlayer() {
     };
 }
 
+function saveGame() {
+    try {
+        localStorage.setItem('textAdventureSaveData', JSON.stringify(player));
+        alert('Game Saved!');
+    } catch (e) {
+        console.error('Sorry, your game could not be saved.', e);
+        alert('Sorry, your game could not be saved. Your browser might not support localStorage or it might be full.');
+    }
+}
+
+function loadGame() {
+    try {
+        const savedData = localStorage.getItem('textAdventureSaveData');
+        if (savedData) {
+            player = JSON.parse(savedData);
+            alert('Game Loaded!');
+            // After loading, we need to re-render the current state
+            updateAllUI();
+            renderPassage(player.currentPassage);
+        } else {
+            alert('No saved game found.');
+        }
+    } catch (e) {
+        console.error('Sorry, your game could not be loaded.', e);
+        alert('Sorry, your game could not be loaded. The save data might be corrupted.');
+    }
+}
+
 function getPlayerAttack() {
     let attack = player.baseAttack;
     if (player.equipment.weapon && items[player.equipment.weapon]) {
@@ -1289,9 +1325,33 @@ function startCombat(monsterName) {
 }
 
 function initializeGame() {
-    initializePlayer();
-    updateAllUI();
-    renderPassage("Start");
+    // Attach event listeners
+    document.getElementById('save-btn').addEventListener('click', e => {
+        e.preventDefault();
+        saveGame();
+    });
+
+    document.getElementById('load-btn').addEventListener('click', e => {
+        e.preventDefault();
+        loadGame();
+    });
+
+    const savedData = localStorage.getItem('textAdventureSaveData');
+    if (savedData) {
+        if (confirm('A previous game was found. Would you like to load it?')) {
+            loadGame();
+        } else {
+            // Start a new game
+            initializePlayer();
+            updateAllUI();
+            renderPassage("Start");
+        }
+    } else {
+        // Start a new game
+        initializePlayer();
+        updateAllUI();
+        renderPassage("Start");
+    }
 }
 
 // --- START GAME ---
