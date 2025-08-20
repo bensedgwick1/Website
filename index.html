@@ -9,6 +9,14 @@
 
 <div id="sidebar" aria-label="Game sidebar with stats">
   <button id="collapse-btn" style="background: none; border: none; color: #03dac6; font-size: 1.5rem; position: absolute; top: 0.5rem; right: 0.5rem; cursor: pointer;">&lt;</button>
+
+  <section id="history-nav" aria-label="History Navigation" style="padding-top: 2rem;">
+      <div class="nav-buttons" style="display: flex; gap: 1rem;">
+          <a href="#" id="back-btn" style="flex: 1; text-align: center;">Back</a>
+          <a href="#" id="forward-btn" style="flex: 1; text-align: center;">Forward</a>
+      </div>
+  </section>
+
   <section id="character-status" aria-label="Character status">
     <h2>Character Status</h2>
     <div class="stat">
@@ -52,10 +60,7 @@
   <section id="game-actions" aria-label="Game Actions">
     <h2>Game Actions</h2>
     <div class="nav-buttons" style="display: block;">
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <a href="#" id="back-btn" style="flex: 1; text-align: center;">Back</a>
-            <a href="#" id="forward-btn" style="flex: 1; text-align: center;">Forward</a>
-        </div>
+        <a href="#" id="new-game-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">New Game</a>
         <a href="#" id="save-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">Save Game</a>
         <a href="#" id="load-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">Load Game</a>
         <a href="#" id="cheat-btn" style="display: block; width: 100%; text-align: center;">Cheat Code</a>

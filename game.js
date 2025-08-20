@@ -1066,6 +1066,13 @@ function saveGame() {
     }
 }
 
+function newGame() {
+    if (confirm("Are you sure you want to start a new game? This will erase your saved progress.")) {
+        localStorage.removeItem('textAdventureSaveData');
+        restartGame();
+    }
+}
+
 function loadGame() {
     try {
         const savedData = localStorage.getItem('textAdventureSaveData');
@@ -1134,6 +1141,11 @@ function initializeGame() {
     document.getElementById('load-btn').addEventListener('click', e => {
         e.preventDefault();
         loadGame();
+    });
+
+    document.getElementById('new-game-btn').addEventListener('click', e => {
+        e.preventDefault();
+        newGame();
     });
 
     document.getElementById('cheat-btn').addEventListener('click', e => {
