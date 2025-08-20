@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <title>Modern Twine Game with Stats Sidebar</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
 
@@ -41,11 +42,20 @@
       </ul>
   </section>
 
+  <section id="quests" aria-label="Player quests">
+      <h2>Quests</h2>
+      <ul id="quest-list">
+          <!-- Dynamic list of quests -->
+      </ul>
+  </section>
+
   <section id="visited-places" aria-label="Visited places count">
     <h2>Visited Places</h2>
-    <ul id="visit-list">
-      <!-- Dynamic list of places -->
-    </ul>
+    <div class="visit-list-container">
+        <ul id="visit-list">
+        <!-- Dynamic list of places -->
+        </ul>
+    </div>
   </section>
 </div>
 
