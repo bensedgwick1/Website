@@ -1053,10 +1053,85 @@ function startCombat(monsterName) {
     renderCombatUI();
 }
 
+function saveGame() {
+    try {
+        localStorage.setItem('textAdventureSaveData', JSON.stringify(player));
+        alert('Game Saved!');
+    } catch (e) {
+        console.error('Sorry, your game could not be saved.', e);
+        alert('Sorry, your game could not be saved. Your browser might not support localStorage or it might be full.');
+    }
+}
+
+function loadGame() {
+    try {
+        const savedData = localStorage.getItem('textAdventureSaveData');
+        if (savedData) {
+            player = JSON.parse(savedData);
+            alert('Game Loaded!');
+            // After loading, we need to re-render the current state
+            updateAllUI();
+            renderPassage(player.currentPassage);
+        } else {
+            alert('No saved game found.');
+        }
+    } catch (e) {
+        console.error('Sorry, your game could not be loaded.', e);
+        alert('Sorry, your game could not be loaded. The save data might be corrupted.');
+    }
+}
+
+function applyCheat() {
+    const password = prompt("Enter secret code:");
+    if (password === "JULES") {
+        player.stats = { ...player.maxStats };
+        player.gold = 9999;
+        player.level = xpPerLevel.length - 1;
+        player.xp = xpPerLevel[xpPerLevel.length - 1];
+
+        const allItems = Object.keys(items);
+        player.inventory = [...new Set([...player.inventory, ...allItems])];
+
+        alert("Cheat activated! You are now a god.");
+        updateAllUI();
+    } else if (password !== null) { // Don't show alert if user cancels the prompt
+        alert("Incorrect password.");
+    }
+}
+
 function initializeGame() {
-    initializePlayer();
-    updateAllUI();
-    renderPassage("Start");
+    // Attach event listeners
+    document.getElementById('save-btn').addEventListener('click', e => {
+        e.preventDefault();
+        saveGame();
+    });
+
+    document.getElementById('load-btn').addEventListener('click', e => {
+        e.preventDefault();
+        loadGame();
+    });
+
+    document.getElementById('cheat-btn').addEventListener('click', e => {
+        e.preventDefault();
+        applyCheat();
+    });
+
+    const savedData = localStorage.getItem('textAdventureSaveData');
+    if (savedData) {
+        if (confirm('A previous game was found. Would you like to load it?')) {
+            loadGame();
+        } else {
+            // Start a new game
+            initializePlayer();
+            updateAllUI();
+            renderPassage("Start");
+        }
+    } else {
+        // Start a new game
+        initializePlayer();
+        updateAllUI();
+        renderPassage("Start");
+    }
 }
 
 // --- START GAME ---
