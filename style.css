@@ -26,6 +26,7 @@ body {
   flex-direction: column;
   gap: 2rem;
   overflow-y: auto;
+  transition: width 0.3s ease;
 }
 #sidebar h2 {
   font-weight: 700;
@@ -86,6 +87,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  transition: margin-left 0.3s ease;
 }
 header {
   background: #1f1f1f;
@@ -147,6 +149,32 @@ main {
   background: #00bfa5;
   box-shadow: 0 6px 16px rgba(0, 191, 165, 0.8);
 }
+
+/* Collapsed Sidebar */
+#sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  border-right: none;
+}
+#sidebar.collapsed > * {
+  display: none;
+}
+#sidebar.collapsed #collapse-btn {
+    display: block;
+    transform: rotate(180deg);
+    right: -2.5rem;
+    top: 0.5rem;
+    background: #1f1f1f;
+    border-radius: 0 5px 5px 0;
+    padding: 0.5rem;
+    border: 3px solid #03dac6;
+    border-left: none;
+}
+
+#content-wrapper.collapsed {
+  margin-left: 0;
+}
+
 @media (max-width: 768px) {
   #sidebar {
     position: relative;
@@ -171,5 +199,8 @@ main {
   }
   main {
     margin: 1rem auto;
+  }
+  #collapse-btn {
+      display: none; /* Hide collapse button on mobile */
   }
 }

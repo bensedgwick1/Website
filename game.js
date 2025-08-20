@@ -560,7 +560,7 @@ const monsters = {
         attack: 5,
         xp: 10,
         gold: 5,
-        image: "https://source.unsplash.com/800x600/?dark,cave,rat",
+        image: "https://images.unsplash.com/photo-1589901142862-627447a47e30",
         deathText: "The giant rat squeals and collapses.",
         nextPassage: "CaveInterior"
     },
@@ -569,7 +569,7 @@ const monsters = {
         attack: 8,
         xp: 20,
         gold: 10,
-        image: "https://images.unsplash.com/photo-1547471080-774b9b013a3b?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1547471080-774b9b013a3b",
         deathText: "The wolf whimpers and falls still.",
         nextPassage: "PlainsAftermath"
     },
@@ -578,7 +578,7 @@ const monsters = {
         attack: 12,
         xp: 25,
         gold: 15,
-        image: "https://source.unsplash.com/800x600/?dark,swamp,monster",
+        image: "https://images.unsplash.com/photo-1570778514552-ba50413f12e3",
         deathText: "The tentacle recoils with a gurgle and sinks back into the murky water.",
         nextPassage: "SwampAftermath"
     },
@@ -587,7 +587,7 @@ const monsters = {
         attack: 10,
         xp: 15,
         gold: 8,
-        image: "https://source.unsplash.com/800x600/?skeleton,warrior,dungeon",
+        image: "https://images.unsplash.com/photo-1598983870677-01e066a0b901",
         deathText: "The skeleton clatters into a pile of bones.",
         nextPassage: "Catacombs_L1_DeadEnd"
     },
@@ -596,7 +596,7 @@ const monsters = {
         attack: 8,
         xp: 20,
         gold: 12,
-        image: "https://source.unsplash.com/800x600/?zombie,graveyard,night",
+        image: "https://images.unsplash.com/photo-1578516323094-d77bb3d035ba",
         deathText: "The zombie groans and falls silent.",
         nextPassage: "Catacombs_L1_EmptySarcophagus"
     },
@@ -605,7 +605,7 @@ const monsters = {
         attack: 15,
         xp: 50,
         gold: 50,
-        image: "https://source.unsplash.com/800x600/?skeleton,knight,armor",
+        image: "https://images.unsplash.com/photo-1573481214476-b644c8e2203d",
         deathText: "The Skeletal Knight shatters into a pile of dust and cursed armor.",
         nextPassage: "Catacombs_L1_Victory"
     },
@@ -614,7 +614,7 @@ const monsters = {
         attack: 18,
         xp: 40,
         gold: 30,
-        image: "https://source.unsplash.com/800x600/?monster,ghoul,dark",
+        image: "https://images.unsplash.com/photo-1627635078051-245f82441f39",
         deathText: "The ghoul lets out a final, wretched scream and dissolves into shadow.",
         nextPassage: "Catacombs_L2_GhoulLair"
     }
@@ -639,7 +639,8 @@ function initializePlayer() {
         equipment: { weapon: null, armor: null },
         visits: {},
         currentPassage: "Start",
-        previousPassage: "Start"
+        history: [],
+        forwardHistory: []
     };
 }
 
@@ -734,7 +735,7 @@ function showDeathScreen() {
 function restartGame() {
     initializePlayer();
     updateAllUI();
-    renderPassage("Start");
+    renderPassage("Start", true);
 }
 
 function checkCondition(condition) {
@@ -762,23 +763,24 @@ function levelUp() {
 function handlePuzzle(puzzleId, choice) {
     if (puzzleId === 'scales') {
         if (choice === 'middle') { // The 'humble' choice
-            renderPassage('Catacombs_L2_Puzzle_Success');
+            renderPassage('Catacombs_L2_Puzzle_Success', false);
         } else {
-            renderPassage('Catacombs_L2_Puzzle_Fail');
+            renderPassage('Catacombs_L2_Puzzle_Fail', false);
         }
     }
 }
 
-function renderPassage(passageName) {
-  if(player.currentPassage !== passageName) {
-    player.previousPassage = player.currentPassage;
+function renderPassage(passageName, isHistoryNavigation = false) {
+  if (!isHistoryNavigation && passageName !== player.currentPassage) {
+    player.history.push(player.currentPassage);
+    player.forwardHistory = [];
   }
   player.currentPassage = passageName;
   const passage = passages[passageName];
 
   if (!passage) {
       console.error("Passage not found: " + passageName);
-      renderPassage("Start");
+      renderPassage("Start", true); // Avoid history loop
       return;
   }
 
@@ -807,7 +809,7 @@ function renderPassage(passageName) {
               `;
               storyDiv.querySelector('a').addEventListener('click', e => {
                   e.preventDefault();
-                  renderPassage(e.target.getAttribute('data-target'));
+                  renderPassage(e.target.getAttribute('data-target'), false);
               });
               updateAllUI();
               return;
@@ -846,6 +848,7 @@ function renderPassage(passageName) {
   }
 
   updateAllUI();
+  updateHistoryButtons();
 
   if (player.stats.health <= 0) {
       showDeathScreen();
@@ -886,7 +889,7 @@ function renderPassage(passageName) {
       } else if (action === 'puzzle') {
           handlePuzzle(puzzleId, choice);
       } else {
-          renderPassage(target);
+          renderPassage(target, false);
       }
     });
   });
@@ -923,7 +926,7 @@ function renderShop(shopId) {
 
     document.getElementById('leave-shop-btn').addEventListener('click', e => {
         e.preventDefault();
-        renderPassage('Market');
+        renderPassage('Market', false);
     });
 
     storyDiv.querySelectorAll('.buy-btn').forEach(button => {
@@ -1011,7 +1014,7 @@ function startCombat(monsterName) {
     function handleFlee() {
         if (Math.random() > 0.5) {
             combatLog = "You successfully escaped!";
-            renderPassage(player.previousPassage);
+            goBack();
         } else {
             combatLog = "You failed to escape!";
             renderCombatUI();
@@ -1041,11 +1044,11 @@ function startCombat(monsterName) {
         `;
         document.getElementById('continue-btn').addEventListener('click', e => {
             e.preventDefault();
-            renderPassage(monster.nextPassage || player.currentPassage);
+            renderPassage(monster.nextPassage || player.currentPassage, false);
         });
         document.getElementById('leave-btn').addEventListener('click', e => {
             e.preventDefault();
-            renderPassage(player.previousPassage);
+            goBack();
         });
         updateAllUI();
     }
@@ -1071,7 +1074,8 @@ function loadGame() {
             alert('Game Loaded!');
             // After loading, we need to re-render the current state
             updateAllUI();
-            renderPassage(player.currentPassage);
+            renderPassage(player.currentPassage, true);
+            updateHistoryButtons();
         } else {
             alert('No saved game found.');
         }
@@ -1099,6 +1103,27 @@ function applyCheat() {
     }
 }
 
+function goBack() {
+    if (player.history.length > 0) {
+        player.forwardHistory.push(player.currentPassage);
+        const previousPassageName = player.history.pop();
+        renderPassage(previousPassageName, true);
+    }
+}
+
+function goForward() {
+    if (player.forwardHistory.length > 0) {
+        player.history.push(player.currentPassage);
+        const nextPassageName = player.forwardHistory.pop();
+        renderPassage(nextPassageName, true);
+    }
+}
+
+function updateHistoryButtons() {
+    document.getElementById('back-btn').disabled = player.history.length === 0;
+    document.getElementById('forward-btn').disabled = player.forwardHistory.length === 0;
+}
+
 function initializeGame() {
     // Attach event listeners
     document.getElementById('save-btn').addEventListener('click', e => {
@@ -1116,6 +1141,16 @@ function initializeGame() {
         applyCheat();
     });
 
+    document.getElementById('back-btn').addEventListener('click', e => {
+        e.preventDefault();
+        goBack();
+    });
+
+    document.getElementById('forward-btn').addEventListener('click', e => {
+        e.preventDefault();
+        goForward();
+    });
+
     const savedData = localStorage.getItem('textAdventureSaveData');
     if (savedData) {
         if (confirm('A previous game was found. Would you like to load it?')) {
@@ -1124,14 +1159,30 @@ function initializeGame() {
             // Start a new game
             initializePlayer();
             updateAllUI();
-            renderPassage("Start");
+            renderPassage("Start", true);
         }
     } else {
         // Start a new game
         initializePlayer();
         updateAllUI();
-        renderPassage("Start");
+        renderPassage("Start", true);
     }
+
+    const collapseBtn = document.getElementById('collapse-btn');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content-wrapper');
+
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        content.classList.toggle('collapsed');
+        if (sidebar.classList.contains('collapsed')) {
+            collapseBtn.innerHTML = '>';
+        } else {
+            collapseBtn.innerHTML = '<';
+        }
+    });
+
+    updateHistoryButtons();
 }
 
 // --- START GAME ---
