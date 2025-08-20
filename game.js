@@ -50,7 +50,12 @@ const passages = {
     image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
     text: "The air in the cave is damp and cold. You hear the skittering of claws in the darkness.",
     monster: "Giant Rat",
-    options: []
+    options: [],
+    quest: {
+        id: "kill_rat",
+        title: "A Rat Problem",
+        description: "You've stumbled upon a cave infested with a giant rat. You should probably take care of it."
+    }
   },
   "CaveInterior": {
       title: "Cave Interior",
@@ -638,6 +643,7 @@ function initializePlayer() {
         inventory: [],
         equipment: { weapon: null, armor: null },
         visits: {},
+        quests: [],
         currentPassage: "Start",
         previousPassage: "Start"
     };
@@ -667,6 +673,7 @@ function updateAllUI() {
     updateStats();
     updateVisitList();
     updateInventory();
+    updateQuests();
 }
 
 function updateStats() {
@@ -692,6 +699,10 @@ function updateInventory() {
                 text += " (Equipped)";
             }
             li.textContent = text;
+            li.addEventListener('click', () => {
+                const item = items[itemName];
+                alert(`${itemName}\n\n${item.description}\nValue: ${item.value}`);
+            });
             ul.appendChild(li);
         });
     }
@@ -700,17 +711,34 @@ function updateInventory() {
     ul.appendChild(goldLi);
 }
 
-function updateVisitList() {
-  const ul = document.getElementById('visit-list');
-  ul.innerHTML = '';
-  const uniqueVisits = [...new Set(Object.keys(player.visits).map(p => passages[p] ? passages[p].title : p))];
-  uniqueVisits.forEach(title => {
-      if (title) {
+function updateQuests() {
+    const ul = document.getElementById('quest-list');
+    ul.innerHTML = '';
+    if (!player.quests || player.quests.length === 0) {
+        ul.innerHTML = '<li>No active quests.</li>';
+        return;
+    }
+    player.quests.forEach(quest => {
         const li = document.createElement('li');
-        li.textContent = title;
+        li.textContent = quest.title;
+        li.addEventListener('click', () => {
+            alert(`${quest.title}\n\n${quest.description}`);
+        });
         ul.appendChild(li);
-      }
-  });
+    });
+}
+
+function updateVisitList() {
+    const ul = document.getElementById('visit-list');
+    ul.innerHTML = '';
+    const uniqueVisits = [...new Set(Object.keys(player.visits).map(p => passages[p] ? passages[p].title : p))];
+    uniqueVisits.forEach(title => {
+        if (title) {
+            const li = document.createElement('li');
+            li.textContent = title;
+            ul.appendChild(li);
+        }
+    });
 }
 
 function showDeathScreen() {
@@ -843,6 +871,10 @@ function renderPassage(passageName) {
       } else if (itemData.type === 'armor') {
           player.equipment.armor = passage.item;
       }
+  }
+
+  if (passage.quest && !player.quests.find(q => q.id === passage.quest.id)) {
+      player.quests.push(passage.quest);
   }
 
   updateAllUI();
@@ -1027,6 +1059,10 @@ function startCombat(monsterName) {
         levelUp();
         combatLog = monster.deathText;
 
+        if (monsterName === "Giant Rat") {
+            player.quests = player.quests.filter(q => q.id !== "kill_rat");
+        }
+
         const storyDiv = document.getElementById('story');
         storyDiv.innerHTML = `
             <article role="article" aria-label="Victory">
@@ -1057,6 +1093,12 @@ function initializeGame() {
     initializePlayer();
     updateAllUI();
     renderPassage("Start");
+
+    const visitedPlacesHeader = document.querySelector('#visited-places h2');
+    visitedPlacesHeader.addEventListener('click', () => {
+        const visitList = document.querySelector('#visited-places .visit-list-container');
+        visitList.classList.toggle('collapsed');
+    });
 }
 
 // --- START GAME ---

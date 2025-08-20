@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Roboto:wght@400;700&display=swap');
+
+:root {
+  --primary-color: #e6e6e6;
+  --background-color: #1a1a1a;
+  --sidebar-background: #2c2c2c;
+  --accent-color: #d4af37;
+  --border-color: #444;
+  --hover-color: #3a3a3a;
+  --stat-health: #c93c3c;
+  --stat-mana: #3c7ac9;
+  --stat-energy: #c9a63c;
+  --stat-happiness: #3cc97d;
+}
+
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  background-color: var(--sidebar-background);
+  border-right: 2px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  font-family: 'Roboto', sans-serif;
+  color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+#sidebar h2 {
+  font-family: 'MedievalSharp', cursive;
+  font-size: 1.8rem;
+  color: var(--accent-color);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 1px;
+}
+
+.stat {
+  margin-bottom: 1rem;
+}
+
+.stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.stat-bar {
+  background: var(--background-color);
+  border-radius: 5px;
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.stat-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+}
+
+.stat-fill.health { background: var(--stat-health); }
+.stat-fill.mana { background: var(--stat-mana); }
+.stat-fill.energy { background: var(--stat-energy); }
+.stat-fill.happiness { background: var(--stat-happiness); }
+
+#inventory ul, #quest-list ul, #visit-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#inventory li, #quest-list li, #visit-list li {
+  padding: 0.5rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#inventory li:hover, #quest-list li:hover, #visit-list li:hover {
+  background-color: var(--hover-color);
+}
+
+#visited-places h2 {
+  cursor: pointer;
+}
+
+#visited-places .visit-list-container {
+  max-height: 200px;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+}
+
+#visited-places .visit-list-container.collapsed {
+  max-height: 0;
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 2px solid var(--border-color);
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  #character-status, #inventory, #quests, #visited-places {
+    flex: 1 1 45%;
+  }
+
+  #content-wrapper {
+    margin-left: 0;
+  }
+}
