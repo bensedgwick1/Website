@@ -687,12 +687,22 @@ function updateInventory() {
         ul.innerHTML = '<li>Empty</li>';
     } else {
         player.inventory.forEach(itemName => {
+            const item = items[itemName];
             const li = document.createElement('li');
+
             let text = itemName;
             if (player.equipment.weapon === itemName || player.equipment.armor === itemName) {
                 text += " (Equipped)";
             }
             li.textContent = text;
+
+            if (item && item.description) {
+                const tooltip = document.createElement('span');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = item.description;
+                li.appendChild(tooltip);
+            }
+
             ul.appendChild(li);
         });
     }
