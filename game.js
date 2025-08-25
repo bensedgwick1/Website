@@ -560,7 +560,7 @@ const monsters = {
         attack: 5,
         xp: 10,
         gold: 5,
-        image: "https://images.unsplash.com/photo-1589901142862-627447a47e30",
+        image: "https://place-hold.it/800x600/a85a32/ffffff?text=Giant+Rat",
         deathText: "The giant rat squeals and collapses.",
         nextPassage: "CaveInterior"
     },
@@ -569,7 +569,7 @@ const monsters = {
         attack: 8,
         xp: 20,
         gold: 10,
-        image: "https://images.unsplash.com/photo-1547471080-774b9b013a3b",
+        image: "https://place-hold.it/800x600/607d8b/ffffff?text=Wolf",
         deathText: "The wolf whimpers and falls still.",
         nextPassage: "PlainsAftermath"
     },
@@ -578,7 +578,7 @@ const monsters = {
         attack: 12,
         xp: 25,
         gold: 15,
-        image: "https://images.unsplash.com/photo-1570778514552-ba50413f12e3",
+        image: "https://place-hold.it/800x600/4caf50/ffffff?text=Swamp+Tentacle",
         deathText: "The tentacle recoils with a gurgle and sinks back into the murky water.",
         nextPassage: "SwampAftermath"
     },
@@ -587,7 +587,7 @@ const monsters = {
         attack: 10,
         xp: 15,
         gold: 8,
-        image: "https://images.unsplash.com/photo-1598983870677-01e066a0b901",
+        image: "https://place-hold.it/800x600/e0e0e0/000000?text=Skeleton",
         deathText: "The skeleton clatters into a pile of bones.",
         nextPassage: "Catacombs_L1_DeadEnd"
     },
@@ -596,7 +596,7 @@ const monsters = {
         attack: 8,
         xp: 20,
         gold: 12,
-        image: "https://images.unsplash.com/photo-1578516323094-d77bb3d035ba",
+        image: "https://place-hold.it/800x600/795548/ffffff?text=Zombie",
         deathText: "The zombie groans and falls silent.",
         nextPassage: "Catacombs_L1_EmptySarcophagus"
     },
@@ -605,7 +605,7 @@ const monsters = {
         attack: 15,
         xp: 50,
         gold: 50,
-        image: "https://images.unsplash.com/photo-1573481214476-b644c8e2203d",
+        image: "https://place-hold.it/800x600/212121/ffffff?text=Skeletal+Knight",
         deathText: "The Skeletal Knight shatters into a pile of dust and cursed armor.",
         nextPassage: "Catacombs_L1_Victory"
     },
@@ -614,7 +614,7 @@ const monsters = {
         attack: 18,
         xp: 40,
         gold: 30,
-        image: "https://images.unsplash.com/photo-1627635078051-245f82441f39",
+        image: "https://place-hold.it/800x600/9e9e9e/000000?text=Ghoul",
         deathText: "The ghoul lets out a final, wretched scream and dissolves into shadow.",
         nextPassage: "Catacombs_L2_GhoulLair"
     }
