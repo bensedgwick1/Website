@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>TestTEST</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+
+<div id="sidebar" aria-label="Game sidebar with stats">
+  <button id="collapse-btn" aria-label="Collapse sidebar">&lt;</button>
+  <section id="character-status" aria-label="Character status">
+    <h2>Character Status</h2>
+    <div class="stat">
+      <div class="stat-label"><span>Health</span><span id="health-val">100</span></div>
+      <div class="stat-bar"><div id="health-bar" class="stat-fill health" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span>Mana</span><span id="mana-val">100</span></div>
+      <div class="stat-bar"><div id="mana-bar" class="stat-fill mana" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span>Energy</span><span id="energy-val">100</span></div>
+      <div class="stat-bar"><div id="energy-bar" class="stat-fill energy" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>Happiness</span><span id="happiness-val">100</span></div>
+        <div class="stat-bar"><div id="happiness-bar" class="stat-fill happiness" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>Level</span><span id="level-val">1</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>XP</span><span id="xp-val">0</span></div>
+    </div>
+  </section>
+
+  <section id="inventory" aria-label="Player inventory">
+      <h2>Inventory</h2>
+      <ul id="inventory-list">
+          <!-- Dynamic list of items -->
+      </ul>
+  </section>
+
+  <section id="quests" aria-label="Player quests">
+      <h2>Quests</h2>
+      <ul id="quest-list">
+          <!-- Dynamic list of quests -->
+      </ul>
+  </section>
+
+  <section id="visited-places" aria-label="Visited places count">
+    <h2>Visited Places</h2>
+    <div class="visit-list-container">
+        <ul id="visit-list">
+        <!-- Dynamic list of places -->
+        </ul>
+    </div>
+  </section>
+</div>
+
+<div id="content-wrapper">
+  <header>Testing Gen</header>
+  <main id="story" role="main" aria-live="polite" style="max-width:720px;margin:2rem auto;padding:0 1rem;">
+    <Fun stuff is being created here.>
+  </main>
+</div>
+
+<script src="game.js"></script>
+
+</body>
+</html>
