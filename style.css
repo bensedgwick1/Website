@@ -178,6 +178,14 @@ main {
 }
 
 /* Buttons */
+.nav-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center; /* Vertically align items */
+}
+
 .nav-buttons a, .nav-buttons button {
   background: transparent;
   color: var(--color-primary);
@@ -189,7 +197,6 @@ main {
   box-shadow: none;
   border: 2px solid var(--color-primary);
   flex-grow: 1;
-  flex-basis: 200px;
   text-align: center;
 }
 .nav-buttons a:hover, .nav-buttons button:hover {
