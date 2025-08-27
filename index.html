@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Modern Twine Game with Stats Sidebar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="sidebar" aria-label="Game sidebar with stats">
+  <button id="collapse-btn" style="background: none; border: none; color: #03dac6; font-size: 1.5rem; position: absolute; top: 0.5rem; right: 0.5rem; cursor: pointer;">&lt;</button>
+
+  <section id="history-nav" aria-label="History Navigation" style="padding-top: 2rem;">
+      <div class="nav-buttons" style="display: flex; gap: 1rem;">
+          <a href="#" id="back-btn" style="flex: 1; text-align: center;">Back</a>
+          <a href="#" id="forward-btn" style="flex: 1; text-align: center;">Forward</a>
+      </div>
+  </section>
+
+  <section id="character-status" aria-label="Character status">
+    <h2>Character Status</h2>
+    <div class="stat">
+      <div class="stat-label"><span>Health</span><span id="health-val">100</span></div>
+      <div class="stat-bar"><div id="health-bar" class="stat-fill health" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span>Mana</span><span id="mana-val">100</span></div>
+      <div class="stat-bar"><div id="mana-bar" class="stat-fill mana" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span>Energy</span><span id="energy-val">100</span></div>
+      <div class="stat-bar"><div id="energy-bar" class="stat-fill energy" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>Happiness</span><span id="happiness-val">100</span></div>
+        <div class="stat-bar"><div id="happiness-bar" class="stat-fill happiness" style="width:100%"></div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>Level</span><span id="level-val">1</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span>XP</span><span id="xp-val">0</span></div>
+    </div>
+  </section>
+
+  <section id="inventory" aria-label="Player inventory">
+      <h2>Inventory</h2>
+      <ul id="inventory-list">
+          <!-- Dynamic list of items -->
+      </ul>
+  </section>
+
+  <section id="visited-places" aria-label="Visited places count">
+    <h2>Visited Places</h2>
+    <ul id="visit-list">
+      <!-- Dynamic list of places -->
+    </ul>
+  </section>
+
+  <section id="game-actions" aria-label="Game Actions">
+    <h2>Game Actions</h2>
+    <div class="nav-buttons" style="display: block;">
+        <a href="#" id="new-game-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">New Game</a>
+        <a href="#" id="save-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">Save Game</a>
+        <a href="#" id="load-btn" style="display: block; width: 100%; text-align: center; margin-bottom: 1rem;">Load Game</a>
+        <a href="#" id="cheat-btn" style="display: block; width: 100%; text-align: center;">Cheat Code</a>
+    </div>
+  </section>
+</div>
+
+<div id="content-wrapper">
+  <header>Testing Gen</header>
+  <main id="story" role="main" aria-live="polite" style="max-width:720px;margin:2rem auto;padding:0 1rem;">
+    <Fun stuff is being created here.>
+  </main>
+</div>
+
+<script src="game.js"></script>
+
+</body>
+</html>
