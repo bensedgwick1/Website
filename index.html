@@ -53,6 +53,13 @@
       </ul>
   </section>
 
+  <section id="quests" aria-label="Player quests">
+      <h2>Quests</h2>
+      <ul id="quest-list">
+          <!-- Dynamic list of quests -->
+      </ul>
+  </section>
+
   <section id="visited-places" aria-label="Visited places count">
     <h2>Visited Places</h2>
     <ul id="visit-list">
@@ -76,6 +83,15 @@
   <main id="story" role="main" aria-live="polite" style="max-width:720px;margin:2rem auto;padding:0 1rem;">
     <Fun stuff is being created here.>
   </main>
+</div>
+
+<div id="modal-backdrop" class="hidden">
+  <div id="modal-content">
+    <h2 id="modal-title"></h2>
+    <p id="modal-text"></p>
+    <div id="modal-input-container"></div>
+    <div id="modal-buttons"></div>
+  </div>
 </div>
 
 <script src="game.js"></script>

@@ -359,6 +359,15 @@ const passages = {
     "Rumor3": {
         title: "The Beggar's Plea",
         text: "A beggar near the door mutters about a lost family heirloom. 'It was a simple silver locket... but it was everything to me. It must be somewhere in the catacombs.'",
+        options: [
+            { text: "Offer to find the locket", target: "AcceptLocketQuest", condition: { type: "questNotStarted", questId: "LostLocket" } },
+            { text: "Back to the bar", target: "Tavern" }
+        ]
+    },
+    "AcceptLocketQuest": {
+        title: "A Glimmer of Hope",
+        text: "The beggar's eyes light up. 'You... you would do that for me? Thank you, kind stranger. May fortune favor you.' The quest 'The Lost Locket' has been added to your journal.",
+        onEnter: () => acceptQuest("LostLocket"),
         options: [{ text: "Back to the bar", target: "Tavern" }]
     },
     "Guardhouse": {
@@ -432,7 +441,8 @@ const passages = {
     "Catacombs_L1_EmptySarcophagus": {
         title: "An Empty Tomb",
         image: "https://images.unsplash.com/photo-1517984928543-85d02a2656a8?auto=format&fit=crop&w=800&q=80",
-        text: "The zombie is defeated. You look inside the sarcophagus, but it is empty save for dust and cobwebs.",
+        text: "The zombie is defeated. You look inside the sarcophagus. Amidst the dust and cobwebs, a small, silver locket glints in the corner.",
+        item: "Silver Locket",
         options: [
             { text: "Try the iron door", target: "Catacombs_L1_LockedDoor" },
             { text: "Go back", target: "Catacombs_Level1_Start" }
@@ -540,7 +550,17 @@ const items = {
     "Rusted Key": { type: "key", description: "A small, ornate key, covered in rust." },
     "Glowing Petal": { type: "trinket", description: "Glows with a soft, warm light.", value: 5 },
     "Old Coin": { type: "quest", description: "A shiny coin from a forgotten era.", value: 0 },
+    "Silver Locket": { type: "quest", description: "A simple silver locket, clearly cherished.", value: 0 },
     "Health Potion": { type: "potion", effect: "health", amount: 30, description: "A vial of red liquid that restores health.", value: 20 }
+};
+
+const quests = {
+    "LostLocket": {
+        title: "The Lost Locket",
+        description: "A beggar in the city square has lost a precious silver locket. He believes it might be somewhere in the catacombs.",
+        objective: { type: "hasItem", item: "Silver Locket" },
+        reward: { gold: 50, xp: 20 }
+    }
 };
 
 const shops = {
@@ -637,6 +657,7 @@ function initializePlayer() {
         gold: 20,
         inventory: [],
         equipment: { weapon: null, armor: null },
+        quests: {}, // status: 'active', 'completed'
         visits: {},
         currentPassage: "Start",
         history: [],
@@ -668,6 +689,7 @@ function updateAllUI() {
     updateStats();
     updateVisitList();
     updateInventory();
+    updateQuestList();
 }
 
 function updateStats() {
@@ -688,20 +710,32 @@ function updateInventory() {
     } else {
         player.inventory.forEach(itemName => {
             const item = items[itemName];
-            const li = document.createElement('li');
+            if (!item) return; // Skip if item not found
 
+            const li = document.createElement('li');
             let text = itemName;
-            if (player.equipment.weapon === itemName || player.equipment.armor === itemName) {
+            const isEquipped = player.equipment.weapon === itemName || player.equipment.armor === itemName;
+
+            if (isEquipped) {
                 text += " (Equipped)";
             }
             li.textContent = text;
 
-            if (item && item.description) {
-                const tooltip = document.createElement('span');
-                tooltip.className = 'tooltip';
-                tooltip.textContent = item.description;
-                li.appendChild(tooltip);
+            if (item.type === 'weapon' || item.type === 'armor') {
+                li.classList.add('equippable');
+                li.dataset.itemName = itemName;
+                li.addEventListener('click', () => equipItem(itemName));
             }
+
+            let tooltipText = item.description;
+            if (item.attack) tooltipText += ` | Attack: ${item.attack}`;
+            if (item.defense) tooltipText += ` | Defense: ${item.defense}`;
+            if (item.value) tooltipText += ` | Value: ${item.value}`;
+
+            const tooltip = document.createElement('span');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = tooltipText;
+            li.appendChild(tooltip);
 
             ul.appendChild(li);
         });
@@ -709,6 +743,111 @@ function updateInventory() {
     const goldLi = document.createElement('li');
     goldLi.innerHTML = `<strong>Gold:</strong> ${player.gold}`;
     ul.appendChild(goldLi);
+}
+
+function equipItem(itemName) {
+    const item = items[itemName];
+    if (!item || (item.type !== 'weapon' && item.type !== 'armor')) {
+        return;
+    }
+
+    const itemType = item.type; // 'weapon' or 'armor'
+
+    // If the item is already equipped, unequip it
+    if (player.equipment[itemType] === itemName) {
+        player.equipment[itemType] = null;
+    } else {
+        // Otherwise, equip it
+        player.equipment[itemType] = itemName;
+    }
+
+    // A full UI refresh is the simplest way to show all changes
+    updateAllUI();
+}
+
+function updateQuestList() {
+    const ul = document.getElementById('quest-list');
+    ul.innerHTML = '';
+    const activeQuests = Object.keys(player.quests).filter(qId => player.quests[qId] && player.quests[qId].status === 'active');
+
+    if (activeQuests.length === 0) {
+        ul.innerHTML = '<li>No active quests.</li>';
+    } else {
+        activeQuests.forEach(questId => {
+            const quest = quests[questId];
+            const li = document.createElement('li');
+            li.textContent = quest.title;
+
+            const tooltip = document.createElement('span');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = quest.description;
+            li.appendChild(tooltip);
+
+            ul.appendChild(li);
+        });
+    }
+}
+
+function acceptQuest(questId) {
+    if (quests[questId] && !player.quests[questId]) {
+        player.quests[questId] = { status: 'active' };
+        updateQuestList();
+    }
+}
+
+function checkQuestCompletion() {
+    const activeQuests = Object.keys(player.quests).filter(qId => player.quests[qId] && player.quests[qId].status === 'active');
+    activeQuests.forEach(questId => {
+        const quest = quests[questId];
+        const objective = quest.objective;
+        let completed = false;
+
+        if (objective.type === 'hasItem' && player.inventory.includes(objective.item)) {
+            completed = true;
+        }
+        // Future quest types could be added here
+
+        if (completed) {
+            completeQuest(questId);
+        }
+    });
+}
+
+function completeQuest(questId) {
+    if (!player.quests[questId] || player.quests[questId].status === 'completed') return; // Don't complete twice
+
+    player.quests[questId].status = 'completed';
+    const quest = quests[questId];
+
+    let rewardText = "";
+    if (quest.reward.gold) {
+        player.gold += quest.reward.gold;
+        rewardText += `${quest.reward.gold} gold`;
+    }
+    if (quest.reward.xp) {
+        player.xp += quest.reward.xp;
+        if (rewardText) rewardText += " and ";
+        rewardText += `${quest.reward.xp} XP`;
+    }
+
+    // This will be replaced by the modal system later.
+    showModal({
+        title: "Quest Complete!",
+        text: `<strong>${quest.title}</strong><br>You received ${rewardText}.`,
+        buttons: [{ text: "Continue", value: () => true }]
+    });
+
+    // Remove quest item from inventory
+    const objective = quest.objective;
+    if (objective.type === 'hasItem') {
+        const itemIndex = player.inventory.indexOf(objective.item);
+        if (itemIndex > -1) {
+            player.inventory.splice(itemIndex, 1);
+        }
+    }
+
+    levelUp();
+    updateAllUI(); // Full UI update to reflect all changes
 }
 
 function updateVisitList() {
@@ -757,6 +896,9 @@ function checkCondition(condition) {
     if (condition.type === "hasGold" && player.gold >= condition.amount) {
         return true;
     }
+    if (condition.type === "questNotStarted" && (!player.quests[condition.questId] || player.quests[condition.questId].status !== 'completed')) {
+        return !player.quests[condition.questId];
+    }
     return false;
 }
 
@@ -766,7 +908,11 @@ function levelUp() {
         player.maxStats.health += 10;
         player.stats.health = player.maxStats.health; // Full heal on level up
         player.baseAttack += 2;
-        alert(`Congratulations! You have reached Level ${player.level}! Your health and attack have increased.`);
+        showModal({
+            title: "Level Up!",
+            text: `Congratulations! You have reached Level ${player.level}!<br>Your max health and base attack have increased.`,
+            buttons: [{ text: "Awesome!", value: () => true }]
+        });
     }
 }
 
@@ -787,6 +933,10 @@ function renderPassage(passageName, isHistoryNavigation = false) {
   }
   player.currentPassage = passageName;
   const passage = passages[passageName];
+
+  if (passage && passage.onEnter) {
+    passage.onEnter();
+  }
 
   if (!passage) {
       console.error("Passage not found: " + passageName);
@@ -849,12 +999,7 @@ function renderPassage(passageName, isHistoryNavigation = false) {
 
   if (passage.item && !player.inventory.includes(passage.item)) {
       player.inventory.push(passage.item);
-      const itemData = items[passage.item];
-      if(itemData.type === 'weapon') {
-          player.equipment.weapon = passage.item;
-      } else if (itemData.type === 'armor') {
-          player.equipment.armor = passage.item;
-      }
+      checkQuestCompletion(); // Check if this item completes a quest
   }
 
   updateAllUI();
@@ -961,7 +1106,11 @@ function buyItem(itemName, shopId) {
         updateAllUI();
         renderShop(shopId);
     } else {
-        alert("Not enough gold!");
+        showModal({
+            title: "Transaction Failed",
+            text: "You don't have enough gold to purchase this item.",
+            buttons: [{ text: "OK", value: () => true }]
+        });
     }
 }
 
@@ -1066,44 +1215,81 @@ function startCombat(monsterName) {
     renderCombatUI();
 }
 
-function saveGame() {
+async function saveGame() {
     try {
         localStorage.setItem('textAdventureSaveData', JSON.stringify(player));
-        alert('Game Saved!');
+        await showModal({
+            title: "Game Saved",
+            text: "Your progress has been saved successfully.",
+            buttons: [{ text: "OK", value: () => true }]
+        });
     } catch (e) {
         console.error('Sorry, your game could not be saved.', e);
-        alert('Sorry, your game could not be saved. Your browser might not support localStorage or it might be full.');
+        await showModal({
+            title: "Save Failed",
+            text: "Sorry, your game could not be saved. Your browser might not support local storage or it might be full.",
+            buttons: [{ text: "OK", value: () => true }]
+        });
     }
 }
 
-function newGame() {
-    if (confirm("Are you sure you want to start a new game? This will erase your saved progress.")) {
+async function newGame() {
+    const confirmed = await showModal({
+        title: "New Game",
+        text: "Are you sure you want to start a new game? This will erase any saved progress.",
+        buttons: [
+            { text: "Cancel", class: "secondary", value: () => false },
+            { text: "Start New Game", value: () => true }
+        ]
+    });
+    if (confirmed) {
         localStorage.removeItem('textAdventureSaveData');
         restartGame();
     }
 }
 
-function loadGame() {
+async function loadGame() {
     try {
         const savedData = localStorage.getItem('textAdventureSaveData');
         if (savedData) {
             player = JSON.parse(savedData);
-            alert('Game Loaded!');
+            await showModal({
+                title: "Game Loaded",
+                text: "Your saved game has been loaded successfully.",
+                buttons: [{ text: "Continue", value: () => true }]
+            });
             // After loading, we need to re-render the current state
             updateAllUI();
             renderPassage(player.currentPassage, true);
             updateHistoryButtons();
         } else {
-            alert('No saved game found.');
+            await showModal({
+                title: "Load Failed",
+                text: "No saved game data was found.",
+                buttons: [{ text: "OK", value: () => true }]
+            });
         }
     } catch (e) {
         console.error('Sorry, your game could not be loaded.', e);
-        alert('Sorry, your game could not be loaded. The save data might be corrupted.');
+        await showModal({
+            title: "Load Error",
+            text: "Sorry, your game could not be loaded. The save data might be corrupted.",
+            buttons: [{ text: "OK", value: () => true }]
+        });
     }
 }
 
-function applyCheat() {
-    const password = prompt("Enter secret code:");
+async function applyCheat() {
+    const password = await showModal({
+        title: "Cheat Code",
+        text: "Enter the secret code to activate cheats.",
+        input: { placeholder: "Code..." },
+        buttons: [
+            { text: "Cancel", class: "secondary", value: () => null },
+            { text: "Activate", value: (inputValue) => inputValue }
+        ]
+    });
+
     if (password === "JULES") {
         player.stats = { ...player.maxStats };
         player.gold = 9999;
@@ -1113,10 +1299,18 @@ function applyCheat() {
         const allItems = Object.keys(items);
         player.inventory = [...new Set([...player.inventory, ...allItems])];
 
-        alert("Cheat activated! You are now a god.");
+        await showModal({
+            title: "Cheats Activated",
+            text: "You are now a god. Go have fun.",
+            buttons: [{ text: "Nice.", value: () => true }]
+        });
         updateAllUI();
     } else if (password !== null) { // Don't show alert if user cancels the prompt
-        alert("Incorrect password.");
+        await showModal({
+            title: "Access Denied",
+            text: "The code you entered is incorrect.",
+            buttons: [{ text: "OK", value: () => true }]
+        });
     }
 }
 
@@ -1139,6 +1333,42 @@ function goForward() {
 function updateHistoryButtons() {
     document.getElementById('back-btn').disabled = player.history.length === 0;
     document.getElementById('forward-btn').disabled = player.forwardHistory.length === 0;
+}
+
+function showModal({ title, text, input, buttons }) {
+    return new Promise(resolve => {
+        const backdrop = document.getElementById('modal-backdrop');
+        const titleEl = document.getElementById('modal-title');
+        const textEl = document.getElementById('modal-text');
+        const inputContainer = document.getElementById('modal-input-container');
+        const buttonsContainer = document.getElementById('modal-buttons');
+
+        titleEl.textContent = title;
+        textEl.innerHTML = text; // Use innerHTML to allow for line breaks
+        inputContainer.innerHTML = '';
+        buttonsContainer.innerHTML = '';
+
+        if (input) {
+            const inputEl = document.createElement('input');
+            inputEl.type = input.type || 'text';
+            inputEl.placeholder = input.placeholder || '';
+            inputContainer.appendChild(inputEl);
+        }
+
+        buttons.forEach(button => {
+            const btnEl = document.createElement('button');
+            btnEl.textContent = button.text;
+            btnEl.className = button.class || '';
+            btnEl.addEventListener('click', () => {
+                const inputValue = input ? inputContainer.querySelector('input').value : null;
+                backdrop.classList.add('hidden');
+                resolve(button.value(inputValue));
+            });
+            buttonsContainer.appendChild(btnEl);
+        });
+
+        backdrop.classList.remove('hidden');
+    });
 }
 
 function initializeGame() {
@@ -1175,14 +1405,22 @@ function initializeGame() {
 
     const savedData = localStorage.getItem('textAdventureSaveData');
     if (savedData) {
-        if (confirm('A previous game was found. Would you like to load it?')) {
-            loadGame();
-        } else {
-            // Start a new game
-            initializePlayer();
-            updateAllUI();
-            renderPassage("Start", true);
-        }
+        showModal({
+            title: "Welcome Back!",
+            text: "A previous game was found. Would you like to load it?",
+            buttons: [
+                { text: "Start New Game", class: "secondary", value: () => "new" },
+                { text: "Load Game", value: () => "load" }
+            ]
+        }).then(choice => {
+            if (choice === 'load') {
+                loadGame();
+            } else {
+                initializePlayer();
+                updateAllUI();
+                renderPassage("Start", true);
+            }
+        });
     } else {
         // Start a new game
         initializePlayer();
